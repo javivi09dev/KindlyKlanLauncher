@@ -41,11 +41,11 @@ loginWithMojang = "Iniciar con Mojang"
 cancelButton = "Cancelar"
 
 [ejs.overlay]
-serverSelectHeader = "Servidores Disponibles"
-serverSelectConfirm = "Seleccionar"
+serverSelectHeader = "💫 Proyectos  💫"
+serverSelectConfirm = "Confirmar"
 serverSelectCancel = "Cancelar"
-accountSelectHeader = "Seleccionar una Cuenta"
-accountSelectConfirm = "Seleccionar"
+accountSelectHeader = "Selecciona una Cuenta"
+accountSelectConfirm = "Confirmar"
 accountSelectCancel = "Cancelar"
 
 [ejs.settings]
@@ -140,28 +140,28 @@ microsoftLogoutTitle = "Cerrar Sesión de Microsoft"
 [js.login]
 login = "INICIAR SESIÓN"
 loggingIn = "INICIANDO SESIÓN"
-success = "ÉXITO"
-tryAgain = "Intentar de Nuevo"
+success = "¡ÉXITO!"
+tryAgain = "Inténtalo de Nuevo..."
 
 [js.login.error]
 invalidValue = "* Valor Inválido"
 requiredValue = "* Requerido"
 
 [js.login.error.unknown]
-title = "Error Desconocido Durante el Inicio de Sesión"
-desc = "Ocurrió un error desconocido. Por favor, consulta la consola para más detalles."
+title = "¡Ups! Hubo un error"
+desc = "Ocurrió un error inesperado. Abre ticket en Kindly Klan."
 
 [js.landing.launch]
 pleaseWait = "Por favor espera.."
 failureTitle = "Error Durante el Lanzamiento"
-failureText = "Consulta la consola (CTRL + Shift + i) para más detalles."
-okay = "Aceptar"
+failureText = "Abre ticket en Kindly Klan para ayudarte."
+okay = "¡De acuerdo!"
 
 [js.landing.selectedAccount]
-noAccountSelected = "Ninguna Cuenta Seleccionada"
+noAccountSelected = "Sin Cuentas Seleccionadas"
 
 [js.landing.selectedServer]
-noSelection = "Ningún Servidor Seleccionado"
+noSelection = "No has seleccionado ningún proyecto."
 loading = "Cargando.."
 
 [js.landing.serverStatus]
@@ -177,90 +177,90 @@ installJava = "Instalar Java"
 installJavaManually = "Instalar Manualmente"
 javaDownloadPrepare = "Preparando Descarga de Java.."
 javaDownloadFailureTitle = "Error Durante la Descarga de Java"
-javaDownloadFailureText = "Consulta la consola (CTRL + Shift + i) para más detalles."
-javaRequired = "Se Requiere Java<br>para Lanzar"
-javaRequiredMessage = 'Se necesita una instalación válida de Java {major} x64 para lanzar.<br><br>Por favor, consulta nuestra <a href="https://github.com/dscalzi/HeliosLauncher/wiki/Java-Management#manually-installing-a-valid-version-of-java">Guía de Gestión de Java</a> para instrucciones sobre cómo instalar Java manualmente.'
+javaDownloadFailureText = "Abre ticket en Kindly Klan."
+javaRequired = "Se Requiere Java<br>para jugar"
+javaRequiredMessage = 'Se necesita una instalación válida de Java {major} x64 para lanzar.<br><br>Por favor, abre ticket en Kindly Klan.'
 javaRequiredDismiss = "Entiendo"
 javaRequiredCancel = "Regresar"
 
 [js.landing.downloadJava]
-findJdkFailure = "Failed to find OpenJDK distribution."
-javaDownloadCorruptedError = "Downloaded JDK has a bad hash, the file may be corrupted."
-extractingJava = "Extracting Java"
-javaInstalled = "Java Installed!"
+findJdkFailure = "Error con OpenJDK distribution."
+javaDownloadCorruptedError = "El JDK tiene un hash maligno, puede estar corrupto."
+extractingJava = "Haciendo magia..."
+javaInstalled = "¡Hecho! Me debes una..."
 
 [js.landing.dlAsync]
-loadingServerInfo = "Loading server information.."
-fatalError = "Fatal Error"
-unableToLoadDistributionIndex = "Could not load a copy of the distribution index. See the console (CTRL + Shift + i) for more details."
-pleaseWait = "Please wait.."
-errorDuringLaunchTitle = "Error During Launch"
-seeConsoleForDetails = "See console (CTRL + Shift + i) for more details."
-validatingFileIntegrity = "Validating file integrity.."
-errorDuringFileVerificationTitle = "Error During File Verification"
-downloadingFiles = "Downloading files.."
-errorDuringFileDownloadTitle = "Error During File Download"
-preparingToLaunch = "Preparing to launch.."
-launchingGame = "Launching game.."
-launchWrapperNotDownloaded = "The main file, LaunchWrapper, failed to download properly. As a result, the game cannot launch.<br><br>To fix this issue, temporarily turn off your antivirus software and launch the game again.<br><br>If you have time, please <a href=\"https://github.com/dscalzi/HeliosLauncher/issues\">submit an issue</a> and let us know what antivirus software you use. We'll contact them and try to straighten things out."
-doneEnjoyServer = "Done. Enjoy the server!"
-checkConsoleForDetails = "Please check the console (CTRL + Shift + i) for more details."
+loadingServerInfo = "Cargando info..."
+fatalError = "Error terrible"
+unableToLoadDistributionIndex = "No hemos podido acceder al distribution.json. Javivi trabaja!"
+pleaseWait = "Espera, impaciente..."
+errorDuringLaunchTitle = "Error al lanzar el juego..."
+seeConsoleForDetails = "Contacta a KK."
+validatingFileIntegrity = "Haciendo magia para ti.."
+errorDuringFileVerificationTitle = "Error al verificar archivos."
+downloadingFiles = "¡Descargando!.."
+errorDuringFileDownloadTitle = "Error al descargar archivos."
+preparingToLaunch = "Moviendo cosillas..."
+launchingGame = "¡Todo ready para empezar!.."
+launchWrapperNotDownloaded = "No hemos podido descargalo todo bien.<br><br>Para arreglar esto, deshabilita el antivirus sólo para esto 🩵"
+doneEnjoyServer = "👍 ¡Vamoos!"
+checkConsoleForDetails = "Abre ticket en Kindly Klan."
 
 [js.landing.news]
-checking = "Checking for News"
+checking = "Llamando a Moly..."
 
 [js.landing.discord]
-loading = "Loading game.."
-joining = "Sailing to Westeros!"
-joined = "Exploring the Realm!"
+loading = "Cargando.."
+joining = "Uniéndose al proyecto"
+joined = "En un proyecto de Kindly Klan"
 
 [js.overlay]
-dismiss = "Dismiss"
+dismiss = "Rechazar"
 
 [js.settings.fileSelectors]
-executables = "Executables"
-allFiles = "All Files"
+executables = "Ejecutables"
+allFiles = "Todos los archivos"
 
 [js.settings.mstfLogin]
-errorTitle = "Something Went Wrong"
-errorMessage = "Microsoft authentication failed. Please try again."
+errorTitle = "¿ERROR! Terrible..."
+errorMessage = "Ha fallado el login con Microsoft. Labura Bill Gates!"
 okButton = "OK"
 
 [js.settings.mstfLogout]
-errorTitle = "Something Went Wrong"
-errorMessage = "Microsoft logout failed. Please try again."
+errorTitle = "Uis.. error."
+errorMessage = "Ha fallado el logout con Microsoft."
 okButton = "OK"
 
 [js.settings.authAccountSelect]
-selectButton = "Select Account"
-selectedButton = "Selected Account &#10004;"
+selectButton = "Seleccionar Cuenta"
+selectedButton = "Seleccionado &#10004;"
 
 [js.settings.authAccountLogout]
-lastAccountWarningTitle = "Warning<br>This is Your Last Account"
-lastAccountWarningMessage = "In order to use the launcher you must be logged into at least one account. You will need to login again after.<br><br>Are you sure you want to log out?"
-confirmButton = "I'm Sure"
-cancelButton = "Cancel"
+lastAccountWarningTitle = "Cuidado<br>Sólo tienes una cuenta"
+lastAccountWarningMessage = "Necesitas una cuenta mínimo, sino tendrás que volver a logearte.<br><br>¿Estás seguro?"
+confirmButton = "Sí"
+cancelButton = "Cancelar"
 
 [js.settings.authAccountPopulate]
-username = "Username"
+username = "Nick"
 uuid = "UUID"
-selectAccount = "Select Account"
-selectedAccount = "Selected Account ✓"
-logout = "Log Out"
+selectAccount = "Seleccionar cuenta"
+selectedAccount = "Cuenta seleccionada ✓"
+logout = "Cerrar sesión"
 
 [js.settings.dropinMods]
-removeButton = "Remove"
-deleteFailedTitle = "Failed to Delete<br>Drop-in Mod {fullName}"
-deleteFailedMessage = "Make sure the file is not in use and try again."
-failedToggleTitle = "Failed to Toggle<br>One or More Drop-in Mods"
-okButton = "Okay"
+removeButton = "Quitar"
+deleteFailedTitle = "Error al eliminar<br>Drop-in Mod {fullName}"
+deleteFailedMessage = "Revisa que no tengas Minecraft abierto o se esté usando."
+failedToggleTitle = "Error al activar<br>Drop-in Mods."
+okButton = "Ok"
 
 [js.settings.serverListing]
-mainServer = "Main Server"
+mainServer = "Principal"
 
 [js.settings.java]
-selectedJava = "Selected: Java {version} ({vendor})"
-invalidSelection = "Invalid Selection"
+selectedJava = "Seleccionado: Java {version} ({vendor})"
+invalidSelection = "Selección Inválida"
 requiresJava = "Requires Java {major} x64."
 availableOptions = "Available Options for Java {major} (HotSpot VM)"
 
