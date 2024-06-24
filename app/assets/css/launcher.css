@@ -22,6 +22,11 @@
     src: url('../fonts/Ringbearer.ttf');
 }
 
+@font-face {
+    font-family: 'Montserrat-Light';
+    src: url('../fonts/Montserrat-Light.otf');
+}
+
 /*******************************************************************************
  *                                                                             *
  * Element Styles                                                              *
@@ -42,8 +47,8 @@ p {
 
 /* Set default font and color. */
 body, button {
-    font-family: 'Avenir Book';
-    color: white;
+    font-family: 'Montserrat-Light';
+    color: rgb(255, 255, 255);
 }
 
 /*body {
@@ -2253,7 +2258,7 @@ input:checked + .toggleSwitchSlider:before {
 .settingsChangelogHeadline {
     padding-bottom: 10px;
     margin-bottom: 10px;
-    border-bottom: 1px solid rgba(126, 126, 126, 0.57);
+    border-bottom: 1px solid rgba(116, 50, 50, 0.726);
 }
 /* Changelog header label. */
 .settingsChangelogLabel {
@@ -3242,7 +3247,7 @@ input:checked + .toggleSwitchSlider:before {
     border-radius: 4px;
     padding: 5px 10px;
     z-index: 1;
-    font-family: 'Avenir Medium';
+    font-family: 'Montserrat-Black';
     font-size: 12px;
     transition: visibility 0s linear 0.25s, opacity 0.25s ease;
     bottom: calc(100% + 15px);
@@ -3456,13 +3461,13 @@ input:checked + .toggleSwitchSlider:before {
     border: none;
     outline: none;
     cursor: pointer;
-    line-height: 24px;
+    line-height: 30px;
     padding: 0px;
-    transition: 0.25s ease;
+    transition: 0.30s ease;
 }
 #server_selection_button:hover,
 #server_selection_button:focus {
-    text-shadow: 0px 0px 20px #fff, 0px 0px 20px #fff, 0px 0px 20px #fff;
+    text-shadow: 0px 0px 20px #0754d9, 0px 0px 20px #9d05d9, 0px 0px 20px #d309d3;
 }
 #server_selection_button:active {
     color: #c7c7c7;
@@ -3557,7 +3562,7 @@ input:checked + .toggleSwitchSlider:before {
 
 /* Overlay title styles. */
 #overlayTitle {
-    font-family: 'Avenir Medium';
+    font-family: 'Minecraft';
     font-size: 20px;
     font-weight: bold;
     letter-spacing: 1px;
