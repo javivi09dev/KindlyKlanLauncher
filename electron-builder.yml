@@ -1,8 +1,8 @@
-appId: 'helioslauncher'
-productName: 'Helios Launcher'
-artifactName: '${productName}-setup-${version}.${ext}'
+appId: 'kindlyklanlauncher'
+productName: 'Kindly Klan Launcher'
+artifactName: '${productName}-${version}.${ext}'
 
-copyright: 'Copyright © 2018-2024 Daniel Scalzi'
+copyright: '© Kindly Klan '
 
 asar: true
 compression: 'maximum'

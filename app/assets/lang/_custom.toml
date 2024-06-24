@@ -11,8 +11,8 @@ mediaYouTubeURL = "#"
 mediaDiscordURL = "https://discord.gg/kindlyklan"
 
 [ejs.settings]
-sourceGithubLink = "https://github.com/dscalZi/HeliosLauncher"
-supportLink = "https://github.com/dscalZi/HeliosLauncher/issues"
+sourceGithubLink = "https://github.com/Warloise/KindlyKlanLauncher"
+supportLink = "https://github.com/Warloise/KindlyKlanLauncher/issues"
 
 [ejs.welcome]
 welcomeHeader = "¡Gracias por descargar el Launcher!"

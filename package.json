@@ -1,8 +1,8 @@
 {
   "name": "KindlyKlan",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "productName": "KindlyKlan Launcher",
-  "description": "Modded Minecraft Launcher",
+  "description": "Launcher de Minecraft",
   "author": "Daniel Scalzi (https://github.com/dscalzi/) modified by Warloise",
   "license": "UNLICENSED",
   "homepage": "https://github.com/Warloise/KindlyKlanLauncher",
