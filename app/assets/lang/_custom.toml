@@ -4,10 +4,10 @@
 title = "Kindly Klan Launcher"
 
 [ejs.landing]
-mediaGitHubURL = "https://github.com/dscalzi/HeliosLauncher"
+mediaGitHubURL = "https://github.com/Warloise/KindlyKlanLauncher"
 mediaTwitterURL = "https://x.com/KindlyKlan"
-mediaInstagramURL = "#"
-mediaYouTubeURL = "#"
+mediaInstagramURL = "https://www.instagram.com/kindlyklan"
+mediaYouTubeURL = "https://www.youtube.com/channel/UCbVZrvJcHUL6nxqmBCzUvkw"
 mediaDiscordURL = "https://discord.gg/kindlyklan"
 
 [ejs.settings]
