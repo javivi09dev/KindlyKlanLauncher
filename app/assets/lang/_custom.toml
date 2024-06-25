@@ -4,15 +4,15 @@
 title = "Kindly Klan Launcher"
 
 [ejs.landing]
-mediaGitHubURL = "https://github.com/Warloise/KindlyKlanLauncher"
+mediaGitHubURL = "https://github.com/javivi09dev/KindlyKlanLauncher"
 mediaTwitterURL = "https://x.com/KindlyKlan"
 mediaInstagramURL = "https://www.instagram.com/kindlyklan"
 mediaYouTubeURL = "https://www.youtube.com/channel/UCbVZrvJcHUL6nxqmBCzUvkw"
 mediaDiscordURL = "https://discord.gg/kindlyklan"
 
 [ejs.settings]
-sourceGithubLink = "https://github.com/Warloise/KindlyKlanLauncher"
-supportLink = "https://github.com/Warloise/KindlyKlanLauncher/issues"
+sourceGithubLink = "https://github.com/javivi09dev/KindlyKlanLauncher"
+supportLink = "https://github.com/javivi09dev/KindlyKlanLauncher/issues"
 
 [ejs.welcome]
 welcomeHeader = "¡Gracias por descargar el Launcher!"

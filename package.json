@@ -1,13 +1,13 @@
 {
   "name": "kindlyklan",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "productName": "KindlyKlan Launcher",
   "description": "Launcher de KK",
   "author": "Daniel Scalzi (https://github.com/dscalzi/) modified by Warloise",
   "license": "UNLICENSED",
-  "homepage": "https://github.com/Warloise/KindlyKlanLauncher",
+  "homepage": "https://github.com/javivi09dev/KindlyKlanLauncher",
   "bugs": {
-    "url": "https://github.com/Warloise/KindlyKlanLauncher/issues"
+    "url": "https://github.com/javivi09dev/KindlyKlanLauncher/issues"
   },
   "private": true,
   "main": "index.js",
@@ -46,6 +46,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Warloise/KindlyKlanLauncher.git"
+    "url": "git+https://github.com/javivi09dev/KindlyKlanLaunchergit"
   }
 }
