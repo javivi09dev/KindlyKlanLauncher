@@ -1,9 +1,9 @@
 {
   "name": "kindlyklan",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "productName": "KindlyKlan Launcher",
   "description": "Launcher de KK",
-  "author": "Daniel Scalzi (https://github.com/dscalzi/) modified by Warloise",
+  "author": "Daniel Scalzi (https://github.com/dscalzi/) modified by Javivi",
   "license": "UNLICENSED",
   "homepage": "https://github.com/javivi09dev/KindlyKlanLauncher",
   "bugs": {
