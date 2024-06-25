@@ -1,6 +1,6 @@
 appId: 'kindlyklanlauncher'
 productName: 'Kindly Klan Launcher'
-artifactName: '${productName}-${version}.${ext}'
+artifactName: '${productName}-setup-${version}.${ext}'
 
 copyright: '© Kindly Klan '
 
