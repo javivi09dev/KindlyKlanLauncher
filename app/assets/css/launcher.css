@@ -3372,6 +3372,7 @@ input:checked + .toggleSwitchSlider:before {
 #newsButtonSVG {
     height: 11px;
     margin-left: -2px;
+    display: none;
     transition: 0.25s ease;
 }
 
