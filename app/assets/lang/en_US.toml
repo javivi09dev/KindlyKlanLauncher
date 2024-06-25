@@ -273,7 +273,7 @@ releaseNotesFailed = "Error al ver las notas de la actu."
 newReleaseTitle = "Nueva Actualización Disponible!"
 newPreReleaseTitle = "Nueva Actualización Beta Disponible!"
 downloadingButton = "Descargando..."
-downloadButton = 'Download from GitHub<span style="font-size: 10px;color: gray;text-shadow: none !important;">Close the launcher and run the dmg to update.</span>'
+downloadButton = 'Descargar'
 latestVersionTitle = "Estás en la última versión"
 checkForUpdatesButton = "Buscar Actualización."
 checkingForUpdatesButton = "Buscando Actualización..."
