@@ -48,12 +48,9 @@ if(!isDev){
             case 'update-available':
                 loggerAutoUpdater.info('New update available', info.version)
                 
-                if (process.platform === 'darwin') {
-                    info.darwindownload = `https://github.com/javivi09dev/KindlyKlanLauncher/releases/download/v${info.version}/Kindly.Klan.Launcher-setup-${info.version}${process.arch === 'arm64' ? '-arm64' : '-x64'}.dmg`;
-                    showUpdateUI(info);
-                } else if (process.platform === 'win32') {
-                    info.windownload = `https://github.com/javivi09dev/KindlyKlanLauncher/releases/download/v${info.version}/Kindly.Klan.Launcher-setup-${info.version}.exe`;
-                    showUpdateUI(info);
+                if(process.platform === 'darwin'){
+                    info.darwindownload = `https://github.com/javivi09dev/KindlyKlanLauncher/releases/download/v${info.version}/Kindly.Klan.Launcher-setup-${info.version}${process.arch === 'arm64' ? '-arm64' : '-x64'}.dmg`
+                    showUpdateUI(info)
                 }
                 populateSettingsUpdateInformation(info)
                 break
