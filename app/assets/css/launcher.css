@@ -1617,10 +1617,10 @@ input:checked + .toggleSwitchSlider:before {
 /* Account select button shared styles. */
 .settingsAuthAccountSelect {
     opacity: 0;
-    border: none;
+    border: 0;
     white-space: nowrap;
     background: none;
-    font-family: 'Minecrafter';
+    font-family: 'Minecraft';
     outline: none;
     transition: 0.25s ease;
 }
