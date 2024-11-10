@@ -110,7 +110,7 @@ aboutTabHeaderDesc = "Ver información y notas de la versión actual."
 aboutTitle = "{appName}"
 stableRelease = "Versión Estable"
 versionText = "Versión "
-sourceGithub = "Fuente (GitHub)"
+sourceGithub = "GitHub"
 support = "Soporte"
 devToolsConsole = "Consola de DevTools"
 releaseNotes = "Notas de la Versión"
@@ -192,7 +192,7 @@ javaInstalled = "¡Hecho! Me debes una..."
 [js.landing.dlAsync]
 loadingServerInfo = "Cargando info..."
 fatalError = "Error terrible"
-unableToLoadDistributionIndex = "No hemos podido acceder al distribution.json. Javivi trabaja!"
+unableToLoadDistributionIndex = "No hemos podido acceder al archivo del servidor. Contacta a KK"
 pleaseWait = "Espera, impaciente..."
 errorDuringLaunchTitle = "Error al lanzar el juego..."
 seeConsoleForDetails = "Contacta a KK."
@@ -200,10 +200,10 @@ validatingFileIntegrity = "Haciendo magia para ti.."
 errorDuringFileVerificationTitle = "Error al verificar archivos."
 downloadingFiles = "¡Descargando!.."
 errorDuringFileDownloadTitle = "Error al descargar archivos."
-preparingToLaunch = "Moviendo cosillas..."
+preparingToLaunch = "Preparando assets..."
 launchingGame = "¡Todo ready para empezar!.."
 launchWrapperNotDownloaded = "No hemos podido descargalo todo bien.<br><br>Para arreglar esto, deshabilita el antivirus sólo para esto 🩵"
-doneEnjoyServer = "👍 ¡Vamoos!"
+doneEnjoyServer = "Lanzando juego 💣"
 checkConsoleForDetails = "Abre ticket en Kindly Klan."
 
 [js.landing.news]
@@ -284,9 +284,9 @@ errorMessage = "No hemos podido logearte, mal negocio.."
 okButton = "OK"
 
 [js.uibinder.startup]
-fatalErrorTitle = "Fatal Error: Unable to Load Distribution Index"
-fatalErrorMessage = "A connection could not be established to our servers to download the distribution index. No local copies were available to load. <br><br>The distribution index is an essential file which provides the latest server information. The launcher is unable to start without it. Ensure you are connected to the internet and relaunch the application."
-closeButton = "Close"
+fatalErrorTitle = "¡Ups! Error Fatal: No he podido acceder al archivo principal. Contacta con Kindly Klan."
+fatalErrorMessage = ""
+closeButton = "Cerrar"
 
 [js.uibinder.validateAccount]
 failedMessageTitle = "Debes volver a logearte"
@@ -296,7 +296,7 @@ loginButton = "Iniciar Sesión"
 selectAnotherAccountButton = "Seleccionar otra Cuenta"
 
 [js.uicore.autoUpdate]
-checkingForUpdateButton = "Buscando Actualizaciones..."
+checkingForUpdateButton = "Buscando Actualizaciones... (Instalando)"
 installNowButton = "Instalar Ahora"
 checkForUpdatesButton = "Buscar Actualización"
 
