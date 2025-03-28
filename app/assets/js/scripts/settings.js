@@ -1458,7 +1458,9 @@ function populateReleaseNotes(){
         success: (data) => {
             const version = 'v' + remote.app.getVersion()
             const entries = $(data).find('entry')
+            let foundCurrentVersion = false
             
+            // Primero intentamos encontrar la versión actual
             for(let i=0; i<entries.length; i++){
                 const entry = $(entries[i])
                 let id = entry.find('id').text()
@@ -1468,7 +1470,17 @@ function populateReleaseNotes(){
                     settingsAboutChangelogTitle.innerHTML = entry.find('title').text()
                     settingsAboutChangelogText.innerHTML = entry.find('content').text()
                     settingsAboutChangelogButton.href = entry.find('link').attr('href')
+                    foundCurrentVersion = true
+                    break
                 }
+            }
+            
+            // Si no encontramos la versión actual, usamos la última disponible
+            if(!foundCurrentVersion && entries.length > 0){
+                const latestEntry = $(entries[0])
+                settingsAboutChangelogTitle.innerHTML = latestEntry.find('title').text()
+                settingsAboutChangelogText.innerHTML = latestEntry.find('content').text()
+                settingsAboutChangelogButton.href = latestEntry.find('link').attr('href')
             }
 
         },
