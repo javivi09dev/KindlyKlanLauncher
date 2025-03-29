@@ -236,3 +236,25 @@ exports.addShaderpacks = function(files, instanceDir) {
     }
 
 }
+
+/**
+ * Escanea la carpeta screenshots del servidor para encontrar capturas de pantalla.
+ * 
+ * @param {string} instanceDir El directorio de la instancia del servidor.
+ * @returns {string[]} Array con las rutas de las capturas de pantalla.
+ */
+exports.scanForScreenshots = function(instanceDir) {
+    const screenshotsDir = path.join(instanceDir, 'screenshots')
+    const screenshots = []
+    
+    if(fs.existsSync(screenshotsDir)) {
+        const files = fs.readdirSync(screenshotsDir)
+        for(const file of files) {
+            if(file.endsWith('.png') || file.endsWith('.jpg') || file.endsWith('.jpeg')) {
+                screenshots.push(path.join(screenshotsDir, file))
+            }
+        }
+    }
+    
+    return screenshots
+}

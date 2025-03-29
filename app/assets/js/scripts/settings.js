@@ -1134,6 +1134,7 @@ async function prepareModsTab(first){
     await resolveModsForUI()
     await resolveDropinModsForUI()
     await resolveShaderpacksForUI()
+    await resolveScreenshotsForUI()
     bindDropinModsRemoveButton()
     bindDropinModFileSystemButton()
     bindShaderpackButton()
@@ -1594,3 +1595,182 @@ async function prepareSettings(first = false) {
 
 // Prepare the settings UI on startup.
 //prepareSettings(true)
+
+/**
+ * Escanea y muestra las capturas de pantalla en la pestaña de Mods.
+ */
+async function resolveScreenshotsForUI() {
+    const serv = (await DistroAPI.getDistribution()).getServerById(ConfigManager.getSelectedServer())
+    const instanceDir = path.join(ConfigManager.getInstanceDirectory(), serv.rawServer.id)
+    const screenshotsDir = path.join(instanceDir, 'screenshots')
+    const screenshots = DropinModUtil.scanForScreenshots(instanceDir)
+    
+    const screenshotsContainer = document.getElementById('settingsScreenshotsContent')
+    
+    if(screenshots.length === 0) {
+        screenshotsContainer.innerHTML = '<div class="noScreenshots">No hay capturas de pantalla disponibles</div>'
+        return
+    }
+    
+    let screenshotsHTML = ''
+    
+    for(let i = 0; i < screenshots.length; i++) {
+        screenshotsHTML += `
+<div class="screenshotThumbnailContainer">
+    <img src="file://${screenshots[i]}" class="screenshotThumbnail" data-index="${i}">
+    <div class="screenshotActionIcons">
+        <button class="screenshotActionButton locateScreenshot" data-path="${screenshots[i]}" title="Abrir ubicación">
+            <i class="fas fa-folder-open"></i>
+        </button>
+        <button class="screenshotActionButton copyScreenshot" data-path="${screenshots[i]}" title="Copiar al portapapeles">
+            <i class="fas fa-copy"></i>
+        </button>
+    </div>
+</div>`
+    }
+    
+    screenshotsContainer.innerHTML = screenshotsHTML
+    
+    // Guardar las rutas de las capturas para el visor
+    window.screenshotPaths = screenshots
+    
+    // Asociar evento clic a cada miniatura para abrir el visor
+    const thumbnails = document.querySelectorAll('.screenshotThumbnail')
+    thumbnails.forEach(thumbnail => {
+        thumbnail.addEventListener('click', openScreenshotViewer)
+    })
+
+    // Asociar eventos a los botones de acción
+    document.querySelectorAll('.locateScreenshot').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.stopPropagation(); // Evitar que se abra el visor
+            const screenshotPath = e.currentTarget.getAttribute('data-path');
+            shell.showItemInFolder(screenshotPath);
+        });
+    });
+
+    document.querySelectorAll('.copyScreenshot').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.stopPropagation(); // Evitar que se abra el visor
+            const screenshotPath = e.currentTarget.getAttribute('data-path');
+            copyImageToClipboard(screenshotPath);
+        });
+    });
+}
+
+/**
+ * Abre el visor de capturas a pantalla completa
+ */
+function openScreenshotViewer(e) {
+    const index = parseInt(e.target.getAttribute('data-index'))
+    const viewer = document.getElementById('screenshotViewer')
+    const image = document.getElementById('screenshotViewerImage')
+    
+    // Establecer la imagen actual
+    image.src = `file://${window.screenshotPaths[index]}`
+    
+    // Guardar el índice actual para la navegación
+    window.currentScreenshotIndex = index
+    
+    // Mostrar el visor
+    viewer.style.display = 'flex'
+    
+    // Establecer el manejador para cerrar el visor
+    document.getElementById('screenshotViewerClose').onclick = closeScreenshotViewer
+    
+    // Configurar los botones de navegación
+    document.getElementById('screenshotPrev').onclick = showPreviousScreenshot
+    document.getElementById('screenshotNext').onclick = showNextScreenshot
+    
+    // Añadir manejador de teclas para la navegación
+    document.addEventListener('keydown', handleScreenshotKeyPress)
+}
+
+/**
+ * Cierra el visor de capturas a pantalla completa
+ */
+function closeScreenshotViewer() {
+    const viewer = document.getElementById('screenshotViewer')
+    viewer.style.display = 'none'
+    
+    // Eliminar el manejador de teclas
+    document.removeEventListener('keydown', handleScreenshotKeyPress)
+}
+
+/**
+ * Maneja las pulsaciones de teclas para la navegación en el visor
+ */
+function handleScreenshotKeyPress(e) {
+    if (e.key === 'Escape') {
+        closeScreenshotViewer()
+    } else if (e.key === 'ArrowLeft') {
+        showPreviousScreenshot()
+    } else if (e.key === 'ArrowRight') {
+        showNextScreenshot()
+    }
+}
+
+/**
+ * Muestra la captura anterior en el visor
+ */
+function showPreviousScreenshot() {
+    if (window.screenshotPaths && window.screenshotPaths.length > 0) {
+        let newIndex = window.currentScreenshotIndex - 1
+        if (newIndex < 0) {
+            newIndex = window.screenshotPaths.length - 1
+        }
+        window.currentScreenshotIndex = newIndex
+        document.getElementById('screenshotViewerImage').src = `file://${window.screenshotPaths[newIndex]}`
+    }
+}
+
+/**
+ * Muestra la captura siguiente en el visor
+ */
+function showNextScreenshot() {
+    if (window.screenshotPaths && window.screenshotPaths.length > 0) {
+        let newIndex = window.currentScreenshotIndex + 1
+        if (newIndex >= window.screenshotPaths.length) {
+            newIndex = 0
+        }
+        window.currentScreenshotIndex = newIndex
+        document.getElementById('screenshotViewerImage').src = `file://${window.screenshotPaths[newIndex]}`
+    }
+}
+
+/**
+ * Copia una imagen al portapapeles
+ * @param {string} imagePath Ruta a la imagen a copiar
+ */
+function copyImageToClipboard(imagePath) {
+    try {
+        // Para imágenes, necesitamos usar el módulo nativo de Electron
+        const { nativeImage, clipboard } = require('electron');
+        const image = nativeImage.createFromPath(imagePath);
+        
+        if (image.isEmpty()) {
+            // Si la imagen no pudo cargarse
+            console.error('No se pudo cargar la imagen:', imagePath);
+            return;
+        }
+        
+        clipboard.writeImage(image);
+        
+        // Mostrar notificación de éxito
+        const notification = document.createElement('div');
+        notification.className = 'copyNotification';
+        notification.textContent = 'Imagen copiada al portapapeles';
+        document.body.appendChild(notification);
+        
+        // Remover la notificación después de un tiempo
+        setTimeout(() => {
+            notification.classList.add('fadeOut');
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 500);
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Error al copiar la imagen:', error);
+    }
+}
