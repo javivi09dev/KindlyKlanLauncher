@@ -42,13 +42,88 @@ const user_text               = document.getElementById('user_text')
 
 const loggerLanding = LoggerUtil.getLogger('Landing')
 
-/* Launch Progress Wrapper Functions */
+const WHITELIST_URL = 'http://files.kindlyklan.com:26500/whitelist/whitelist.json'
+
+async function checkWhitelist(username) {
+    try {
+        loggerLanding.info('Verificando whitelist para:', username)
+        const response = await fetch(WHITELIST_URL)
+        if (!response.ok) {
+            loggerLanding.error('Error al obtener la whitelist:', response.status)
+            return true
+        }
+        
+        const whitelistData = await response.json()
+        
+        if (whitelistData.whitelist === false) {
+            loggerLanding.info('La whitelist está desactivada, permitiendo acceso')
+            return true
+        }
+        
+        if (whitelistData.allowedUsers) {
+            loggerLanding.info('Formato de whitelist encontrado: allowedUsers')
+            return whitelistData.allowedUsers.some(entry => 
+                typeof entry === 'string' && entry.toLowerCase() === username.toLowerCase()
+            )
+        }
+        
+        if (Array.isArray(whitelistData)) {
+            loggerLanding.info('Formato de whitelist encontrado: array')
+            return whitelistData.some(entry => 
+                typeof entry === 'string' ? 
+                    entry.toLowerCase() === username.toLowerCase() : 
+                    entry.name && entry.name.toLowerCase() === username.toLowerCase()
+            )
+        } else if (typeof whitelistData === 'object') {
+            loggerLanding.info('Formato de whitelist encontrado: objeto')
+            return whitelistData[username.toLowerCase()] !== undefined || 
+                   Object.values(whitelistData).some(v => 
+                       typeof v === 'string' ? 
+                           v.toLowerCase() === username.toLowerCase() : 
+                           v.name && v.name.toLowerCase() === username.toLowerCase()
+                   )
+        }
+        
+        loggerLanding.warn('Formato de whitelist no reconocido')
+        return false
+    } catch (err) {
+        loggerLanding.error('Error al verificar whitelist:', err)
+        return true
+    }
+}
 
 /**
- * Show/hide the loading area.
- * 
- * @param {boolean} loading True if the loading area should be shown, otherwise false.
+ * Actualiza el botón de lanzamiento según el estado de whitelist del usuario
+ * @param {Object} authUser Objeto de usuario autenticado
  */
+async function updateLaunchButtonWhitelist(authUser) {
+    if (!authUser || !authUser.displayName) {
+        setLaunchEnabled(false)
+        return
+    }
+    
+    const isWhitelisted = await checkWhitelist(authUser.displayName)
+    
+    if (!isWhitelisted) {
+        loggerLanding.warn(`Usuario ${authUser.displayName} no está en la whitelist`)
+        setLaunchEnabled(false)
+        setOverlayContent(
+            Lang.queryJS('landing.whitelist.notWhitelisted') || 'No estás en la whitelist',
+            Lang.queryJS('landing.whitelist.contactAdmin') || 'Contacta al administrador para solicitar acceso al servidor.',
+            Lang.queryJS('landing.whitelist.understand') || 'Entendido'
+        )
+        setOverlayHandler(() => {
+            toggleOverlay(false)
+        })
+        toggleOverlay(true)
+    } else {
+        loggerLanding.info(`Usuario ${authUser.displayName} verificado en whitelist`)
+        // Solo habilitamos el botón si hay un servidor seleccionado
+        const serverSelected = ConfigManager.getSelectedServer() != null
+        setLaunchEnabled(serverSelected && isWhitelisted)
+    }
+}
+
 function toggleLaunchArea(loading){
     if(loading){
         launch_details.style.display = 'flex'
@@ -59,20 +134,10 @@ function toggleLaunchArea(loading){
     }
 }
 
-/**
- * Set the details text of the loading area.
- * 
- * @param {string} details The new text for the loading details.
- */
 function setLaunchDetails(details){
     launch_details_text.innerHTML = details
 }
 
-/**
- * Set the value of the loading progress bar and display that value.
- * 
- * @param {number} percent Percentage (0-100)
- */
 function setLaunchPercentage(percent){
     launch_progress.setAttribute('max', 100)
     launch_progress.setAttribute('value', percent)
@@ -151,6 +216,8 @@ function updateSelectedAccount(authUser){
         if(authUser.uuid != null){
             document.getElementById('avatarContainer').style.backgroundImage = `url('https://mc-heads.net/body/${authUser.uuid}/right')`
         }
+        // Verificar whitelist cuando se cambia de cuenta
+        updateLaunchButtonWhitelist(authUser)
     }
     user_text.innerHTML = username
 }
@@ -553,87 +620,105 @@ async function dlAsync(login = true) {
 
     if(login) {
         const authUser = ConfigManager.getSelectedAccount()
-        loggerLaunchSuite.info(`Sending selected account (${authUser.displayName}) to ProcessBuilder.`)
-        let pb = new ProcessBuilder(serv, versionData, modLoaderData, authUser, remote.app.getVersion())
-        setLaunchDetails(Lang.queryJS('landing.dlAsync.launchingGame'))
-
-        // const SERVER_JOINED_REGEX = /\[.+\]: \[CHAT\] [a-zA-Z0-9_]{1,16} joined the game/
-        const SERVER_JOINED_REGEX = new RegExp(`\\[.+\\]: \\[CHAT\\] ${authUser.displayName} joined the game`)
-
-        const onLoadComplete = () => {
-            toggleLaunchArea(false)
-            if(hasRPC){
-                DiscordWrapper.updateDetails(Lang.queryJS('landing.discord.loading'))
-                proc.stdout.on('data', gameStateChange)
+        loggerLaunchSuite.info(`Verificando whitelist para: ${authUser.displayName}`)
+        try {
+            // Verificamos la whitelist antes de lanzar el juego
+            const isWhitelisted = await checkWhitelist(authUser.displayName)
+            if (!isWhitelisted) {
+                loggerLaunchSuite.error(`Usuario ${authUser.displayName} no está en la whitelist`)
+                showLaunchFailure(
+                    Lang.queryJS('landing.whitelist.notWhitelisted') || 'No estás en la whitelist',
+                    Lang.queryJS('landing.whitelist.contactAdmin') || 'Contacta al administrador para solicitar acceso al servidor.'
+                )
+                return
             }
-            proc.stdout.removeListener('data', tempListener)
-            proc.stderr.removeListener('data', gameErrorListener)
-        }
-        const start = Date.now()
+            
+            loggerLaunchSuite.info(`Enviando cuenta seleccionada (${authUser.displayName}) a ProcessBuilder.`)
+            let pb = new ProcessBuilder(serv, versionData, modLoaderData, authUser, remote.app.getVersion())
 
-        // Attach a temporary listener to the client output.
-        // Will wait for a certain bit of text meaning that
-        // the client application has started, and we can hide
-        // the progress bar stuff.
-        const tempListener = function(data){
-            if(GAME_LAUNCH_REGEX.test(data.trim())){
-                const diff = Date.now()-start
-                if(diff < MIN_LINGER) {
-                    setTimeout(onLoadComplete, MIN_LINGER-diff)
-                } else {
-                    onLoadComplete()
+            // const SERVER_JOINED_REGEX = /\[.+\]: \[CHAT\] [a-zA-Z0-9_]{1,16} joined the game/
+            const SERVER_JOINED_REGEX = new RegExp(`\\[.+\\]: \\[CHAT\\] ${authUser.displayName} joined the game`)
+
+            const onLoadComplete = () => {
+                toggleLaunchArea(false)
+                if(hasRPC){
+                    DiscordWrapper.updateDetails(Lang.queryJS('landing.discord.loading'))
+                    proc.stdout.on('data', gameStateChange)
+                }
+                proc.stdout.removeListener('data', tempListener)
+                proc.stderr.removeListener('data', gameErrorListener)
+            }
+            const start = Date.now()
+
+            // Attach a temporary listener to the client output.
+            // Will wait for a certain bit of text meaning that
+            // the client application has started, and we can hide
+            // the progress bar stuff.
+            const tempListener = function(data){
+                if(GAME_LAUNCH_REGEX.test(data.trim())){
+                    const diff = Date.now()-start
+                    if(diff < MIN_LINGER) {
+                        setTimeout(onLoadComplete, MIN_LINGER-diff)
+                    } else {
+                        onLoadComplete()
+                    }
                 }
             }
-        }
 
-        // Listener for Discord RPC.
-        const gameStateChange = function(data){
-            data = data.trim()
-            if(SERVER_JOINED_REGEX.test(data)){
-                DiscordWrapper.updateDetails(Lang.queryJS('landing.discord.joined'))
-            } else if(GAME_JOINED_REGEX.test(data)){
-                DiscordWrapper.updateDetails(Lang.queryJS('landing.discord.joining'))
-            }
-        }
-
-        const gameErrorListener = function(data){
-            data = data.trim()
-            if(data.indexOf('Could not find or load main class net.minecraft.launchwrapper.Launch') > -1){
-                loggerLaunchSuite.error('Game launch failed, LaunchWrapper was not downloaded properly.')
-                showLaunchFailure(Lang.queryJS('landing.dlAsync.errorDuringLaunchTitle'), Lang.queryJS('landing.dlAsync.launchWrapperNotDownloaded'))
-            }
-        }
-
-        try {
-            // Build Minecraft process.
-            proc = pb.build()
-
-            // Bind listeners to stdout.
-            proc.stdout.on('data', tempListener)
-            proc.stderr.on('data', gameErrorListener)
-
-            setLaunchDetails(Lang.queryJS('landing.dlAsync.doneEnjoyServer'))
-
-            // Init Discord Hook
-            if(distro.rawDistribution.discord != null && serv.rawServer.discord != null){
-                DiscordWrapper.initRPC(distro.rawDistribution.discord, serv.rawServer.discord)
-                hasRPC = true
-                proc.on('close', (code, signal) => {
-                    loggerLaunchSuite.info('Shutting down Discord Rich Presence..')
-                    DiscordWrapper.shutdownRPC()
-                    hasRPC = false
-                    proc = null
-                })
+            // Listener for Discord RPC.
+            const gameStateChange = function(data){
+                data = data.trim()
+                if(SERVER_JOINED_REGEX.test(data)){
+                    DiscordWrapper.updateDetails(Lang.queryJS('landing.discord.joined'))
+                } else if(GAME_JOINED_REGEX.test(data)){
+                    DiscordWrapper.updateDetails(Lang.queryJS('landing.discord.joining'))
+                }
             }
 
-        } catch(err) {
+            const gameErrorListener = function(data){
+                data = data.trim()
+                if(data.indexOf('Could not find or load main class net.minecraft.launchwrapper.Launch') > -1){
+                    loggerLaunchSuite.error('Game launch failed, LaunchWrapper was not downloaded properly.')
+                    showLaunchFailure(Lang.queryJS('landing.dlAsync.errorDuringLaunchTitle'), Lang.queryJS('landing.dlAsync.launchWrapperNotDownloaded'))
+                }
+            }
 
-            loggerLaunchSuite.error('Error during launch', err)
-            showLaunchFailure(Lang.queryJS('landing.dlAsync.errorDuringLaunchTitle'), Lang.queryJS('landing.dlAsync.checkConsoleForDetails'))
+            try {
+                // Build Minecraft process.
+                proc = pb.build()
+
+                // Bind listeners to stdout.
+                proc.stdout.on('data', tempListener)
+                proc.stderr.on('data', gameErrorListener)
+
+                setLaunchDetails(Lang.queryJS('landing.dlAsync.doneEnjoyServer'))
+
+                // Init Discord Hook
+                if(distro.rawDistribution.discord != null && serv.rawServer.discord != null){
+                    DiscordWrapper.initRPC(distro.rawDistribution.discord, serv.rawServer.discord)
+                    hasRPC = true
+                    proc.on('close', (code, signal) => {
+                        loggerLaunchSuite.info('Shutting down Discord Rich Presence..')
+                        DiscordWrapper.shutdownRPC()
+                        hasRPC = false
+                        proc = null
+                    })
+                }
+
+            } catch(err) {
+
+                loggerLaunchSuite.error('Error during launch', err)
+                showLaunchFailure(Lang.queryJS('landing.dlAsync.errorDuringLaunchTitle'), Lang.queryJS('landing.dlAsync.checkConsoleForDetails'))
 
         }
+    } catch (error) {
+        loggerLaunchSuite.error('Error during whitelist verification:', error)
+        showLaunchFailure(
+            Lang.queryJS('landing.whitelist.verificationError') || 'Error al verificar la whitelist',
+            Lang.queryJS('landing.whitelist.contactAdmin') || 'Contacta al administrador para más detalles.'
+        )
+        return
     }
-
 }
 
 /**
@@ -1023,4 +1108,5 @@ async function loadNews(){
     })
 
     return await promise
+}
 }
