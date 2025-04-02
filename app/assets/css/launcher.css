@@ -3818,7 +3818,6 @@ input:checked + .toggleSwitchSlider:before {
     justify-content: flex-start;
 }
 
-/* The minecraft version of the server listing. */
 .serverListingVersion {
     font-size: 10px;
     text-align: center;
@@ -3828,16 +3827,38 @@ input:checked + .toggleSwitchSlider:before {
     line-height: 12px;
     height: 12px;
     border-radius: 2px;
-    background: rgba(31, 140, 11, 0.8);
-    padding: 0px 2px;
+    background: rgba(0, 0, 0, 0.33);
+    padding: 1px 5px;
+    margin: 0px 5px 0px 0px;
 }
 
 /* The revision version of the server's manifest. */
 .serverListingRevision {
-    color: #969696;
     font-size: 10px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     line-height: 12px;
-    padding: 0px 5px;
+    height: 12px;
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.33);
+    padding: 1px 5px;
+    margin: 0px 5px 0px 0px;
+}
+
+.serverListingPlayTime {
+    font-size: 10px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 12px;
+    height: 12px;
+    border-radius: 2px;
+    background: rgba(36, 96, 35, 0.5);
+    padding: 1px 5px;
+    margin: 0px 5px 0px 0px;
 }
 
 /* Star which indicates the default (main) server. */

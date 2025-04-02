@@ -273,6 +273,10 @@ async function populateServerListings(){
     const servers = distro.servers
     let htmlString = ''
     for(const serv of servers){
+        // Obtener el tiempo jugado para este servidor
+        const playTime = ConfigManager.getPlayTime(serv.rawServer.id)
+        const formattedPlayTime = ConfigManager.formatPlayTime(playTime)
+        
         htmlString += `<button class="serverListing" servid="${serv.rawServer.id}" ${serv.rawServer.id === giaSel ? 'selected' : ''}>
             <img class="serverListingImg" src="${serv.rawServer.icon}"/>
             <div class="serverListingDetails">
@@ -281,6 +285,7 @@ async function populateServerListings(){
                 <div class="serverListingInfo">
                     <div class="serverListingVersion">${serv.rawServer.minecraftVersion}</div>
                     <div class="serverListingRevision">${serv.rawServer.version}</div>
+                    <div class="serverListingPlayTime">${formattedPlayTime}</div>
                     ${serv.rawServer.mainServer ? `<div class="serverListingStarWrapper">
                         <svg id="Layer_1" viewBox="0 0 107.45 104.74" width="20px" height="20px">
                             <defs>

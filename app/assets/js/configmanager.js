@@ -99,7 +99,8 @@ const DEFAULT_CONFIG = {
     selectedAccount: null,
     authenticationDatabase: {},
     modConfigurations: [],
-    javaConfig: {}
+    javaConfig: {},
+    playTime: {} // Tiempo jugado por servidor
 }
 
 let config = null
@@ -790,4 +791,47 @@ exports.getAllowPrerelease = function(def = false){
  */
 exports.setAllowPrerelease = function(allowPrerelease){
     config.settings.launcher.allowPrerelease = allowPrerelease
+}
+
+// Play Time Functions
+
+/**
+ * Obtiene el tiempo de juego para un servidor específico.
+ * 
+ * @param {string} serverid El ID del servidor.
+ * @returns {number} El tiempo de juego en minutos, o 0 si no hay registro.
+ */
+exports.getPlayTime = function(serverid){
+    return config.playTime[serverid] || 0
+}
+
+/**
+ * Añade tiempo de juego a un servidor específico.
+ * 
+ * @param {string} serverid El ID del servidor.
+ * @param {number} minutes Minutos a añadir al tiempo de juego.
+ */
+exports.addPlayTime = function(serverid, minutes){
+    if(!config.playTime[serverid]){
+        config.playTime[serverid] = 0
+    }
+    config.playTime[serverid] += minutes
+}
+
+/**
+ * Formatea el tiempo de juego en un formato legible.
+ * 
+ * @param {number} minutes Tiempo en minutos.
+ * @returns {string} Tiempo formateado (por ejemplo, "2h 30m").
+ */
+exports.formatPlayTime = function(minutes){
+    if (minutes <= 0) {
+        return "Nunca jug."
+    } else if (minutes < 60) {
+        return `${minutes}m`
+    } else {
+        const hours = Math.floor(minutes / 60)
+        const mins = minutes % 60
+        return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
+    }
 }

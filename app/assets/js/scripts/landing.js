@@ -506,6 +506,9 @@ async function downloadJava(effectiveJavaOptions, launchAfter = true) {
 let proc
 // Is DiscordRPC enabled
 let hasRPC = false
+// Variables para el registro de tiempo de juego
+let gameStartTime = null
+let currentServer = null
 // Joined server regex
 // Change this if your server uses something different.
 const GAME_JOINED_REGEX = /\[.+\]: Sound engine started/
@@ -686,6 +689,10 @@ async function dlAsync(login = true) {
             try {
                 // Build Minecraft process.
                 proc = pb.build()
+                
+                // Guardar referencia al servidor actual e iniciar seguimiento del tiempo de juego
+                currentServer = serv.rawServer.id
+                gameStartTime = Date.now()
 
                 // Bind listeners to stdout.
                 proc.stdout.on('data', tempListener)
@@ -701,10 +708,37 @@ async function dlAsync(login = true) {
                         loggerLaunchSuite.info('Shutting down Discord Rich Presence..')
                         DiscordWrapper.shutdownRPC()
                         hasRPC = false
+                        
+                        // Calcular y guardar tiempo de juego cuando se cierra el proceso
+                        if(gameStartTime != null && currentServer != null) {
+                            const now = Date.now()
+                            const playedMinutes = Math.floor((now - gameStartTime) / 60000) // Convertir ms a minutos
+                            loggerLaunchSuite.info(`Añadiendo ${playedMinutes} minutos de tiempo de juego a ${currentServer}`)
+                            ConfigManager.addPlayTime(currentServer, playedMinutes)
+                            ConfigManager.save()
+                            gameStartTime = null
+                            currentServer = null
+                        }
+                        
+                        proc = null
+                    })
+                } else {
+                    // Si no hay Discord RPC, todavía necesitamos rastrear el tiempo de juego
+                    proc.on('close', (code, signal) => {
+                        // Calcular y guardar tiempo de juego cuando se cierra el proceso
+                        if(gameStartTime != null && currentServer != null) {
+                            const now = Date.now()
+                            const playedMinutes = Math.floor((now - gameStartTime) / 60000) // Convertir ms a minutos
+                            loggerLaunchSuite.info(`Añadiendo ${playedMinutes} minutos de tiempo de juego a ${currentServer}`)
+                            ConfigManager.addPlayTime(currentServer, playedMinutes)
+                            ConfigManager.save()
+                            gameStartTime = null
+                            currentServer = null
+                        }
+                        
                         proc = null
                     })
                 }
-
             } catch(err) {
 
                 loggerLaunchSuite.error('Error during launch', err)
