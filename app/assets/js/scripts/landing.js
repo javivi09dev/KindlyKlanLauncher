@@ -47,7 +47,14 @@ const WHITELIST_URL = 'http://files.kindlyklan.com:26500/whitelist/whitelist.jso
 async function checkWhitelist(username) {
     try {
         loggerLanding.info('Verificando whitelist para:', username)
-        const response = await fetch(WHITELIST_URL)
+        const timestamp = Date.now()
+        const response = await fetch(`${WHITELIST_URL}?t=${timestamp}`, {
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            }
+        })
         if (!response.ok) {
             loggerLanding.error('Error al obtener la whitelist:', response.status)
             return true
