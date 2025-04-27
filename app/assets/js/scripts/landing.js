@@ -42,7 +42,7 @@ const user_text               = document.getElementById('user_text')
 
 const loggerLanding = LoggerUtil.getLogger('Landing')
 
-const WHITELIST_URL = 'http://files2.kindlyklan.com/whitelist/whitelist.json'
+const WHITELIST_URL = 'http://files.kindlyklan.com:26500/whitelist/whitelist.json'
 
 async function checkWhitelist(username) {
     try {
