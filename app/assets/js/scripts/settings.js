@@ -1338,6 +1338,7 @@ function populateMemoryStatus(){
  * @param {string} execPath The executable path to populate against.
  */
 async function populateJavaExecDetails(execPath){
+    const { validateSelectedJvm, ensureJavaDirIsRoot } = require('helios-core/java')
     const server = (await DistroAPI.getDistribution()).getServerById(ConfigManager.getSelectedServer())
 
     const details = await validateSelectedJvm(ensureJavaDirIsRoot(execPath), server.effectiveJavaOptions.supported)

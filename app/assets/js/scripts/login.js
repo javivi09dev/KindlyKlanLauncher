@@ -181,48 +181,48 @@ loginForm.onsubmit = () => { return false }
 
 // Bind login button behavior.
 loginButton.addEventListener('click', () => {
-    // Disable form.
+    // Disable form and show loading.
     formDisabled(true)
-
-    // Show loading stuff.
     loginLoading(true)
 
-    AuthManager.addMojangAccount(loginUsername.value, loginPassword.value).then((value) => {
+    AuthManager.addMojangAccount(loginUsername.value, loginPassword.value)
+    .then(async (value) => {
         updateSelectedAccount(value)
-        loginButton.innerHTML = loginButton.innerHTML.replace(Lang.queryJS('login.loggingIn'), Lang.queryJS('login.success'))
-        $('.circle-loader').toggleClass('load-complete')
-        $('.checkmark').toggle()
-        setTimeout(() => {
-            switchView(VIEWS.login, loginViewOnSuccess, 500, 500, async () => {
-                // Temporary workaround
-                if(loginViewOnSuccess === VIEWS.settings){
-                    await prepareSettings()
-                }
-                loginViewOnSuccess = VIEWS.landing // Reset this for good measure.
-                loginCancelEnabled(false) // Reset this for good measure.
-                loginViewCancelHandler = null // Reset this for good measure.
-                loginUsername.value = ''
-                loginPassword.value = ''
-                $('.circle-loader').toggleClass('load-complete')
-                $('.checkmark').toggle()
-                loginLoading(false)
-                loginButton.innerHTML = loginButton.innerHTML.replace(Lang.queryJS('login.success'), Lang.queryJS('login.login'))
-                formDisabled(false)
-            })
-        }, 1000)
-    }).catch((displayableError) => {
+        // Breve pausa para feedback visual.
+        setTimeout(async () => {
+            // Overlay mensaje Java.
+            setOverlayContent(
+                'Descargando Java...',
+                'Espera unos instantes. Estamos haciendo magia por ti.',
+                'OK'
+            )
+            toggleOverlay(true, false, 'overlayContent')
+            // Descarga Java remoto
+            try {
+                await checkAndApplyRemoteJavaConfig(false)
+            } catch(err) {
+                console.warn('Error al aplicar config Java remoto tras login:', err)
+            }
+            toggleOverlay(false)
+            // Una vez terminado, pasamos a la vista principal
+            switchView(VIEWS.login, VIEWS.landing, 500, 500)
+            // Ocultar vista de espera por si quedó visible
+            $('#waitingContainer').hide();
+            // Reset UI de login
+            loginLoading(false)
+            formDisabled(false)
+            loginUsername.value = ''
+            loginPassword.value = ''
+        }, 500)
+    })
+    .catch((displayableError) => {
         loginLoading(false)
-
         let actualDisplayableError
         if(isDisplayableError(displayableError)) {
-            msftLoginLogger.error('Error while logging in.', displayableError)
             actualDisplayableError = displayableError
         } else {
-            // Uh oh.
-            msftLoginLogger.error('Unhandled error during login.', displayableError)
             actualDisplayableError = Lang.queryJS('login.error.unknown')
         }
-
         setOverlayContent(actualDisplayableError.title, actualDisplayableError.desc, Lang.queryJS('login.tryAgain'))
         setOverlayHandler(() => {
             formDisabled(false)
@@ -230,5 +230,4 @@ loginButton.addEventListener('click', () => {
         })
         toggleOverlay(true)
     })
-
 })

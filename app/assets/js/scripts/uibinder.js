@@ -67,23 +67,25 @@ async function showMainUI(data){
     await prepareSettings(true)
     updateSelectedServer(data.getServerById(ConfigManager.getSelectedServer()))
     refreshServerStatus()
+
+    // Comprobación remota de Java al iniciar
+    try {
+        await checkAndApplyRemoteJavaConfig(false)
+    } catch (err) {
+        console.warn('Error al aplicar config Java remoto:', err)
+    }
+
     setTimeout(() => {
         document.getElementById('frameBar').style.backgroundColor = 'rgba(0, 0, 0, 0.5)'
         document.body.style.backgroundImage = `url('assets/images/backgrounds/${document.body.getAttribute('bkid')}.jpg')`
-        $('#main').show()
+        // Ocultar pantalla de carga y luego mostrar main y vista adecuada
+        $('#loadingContainer').fadeOut(500, () => {
+            $('#loadSpinnerImage').removeClass('rotating')
+            // Ocultar vista de espera antes de mostrar main
+            $('#waitingContainer').hide()
+            $('#main').show()
 
-        const isLoggedIn = Object.keys(ConfigManager.getAuthAccounts()).length > 0
-
-        // If this is enabled in a development environment we'll get ratelimited.
-        // The relaunch frequency is usually far too high.
-        if(!isDev && isLoggedIn){
-            validateSelectedAccount()
-        }
-
-        if(ConfigManager.isFirstLaunch()){
-            currentView = VIEWS.welcome
-            $(VIEWS.welcome).fadeIn(1000)
-        } else {
+            const isLoggedIn = Object.keys(ConfigManager.getAuthAccounts()).length > 0
             if(isLoggedIn){
                 currentView = VIEWS.landing
                 $(VIEWS.landing).fadeIn(1000)
@@ -94,14 +96,7 @@ async function showMainUI(data){
                 currentView = VIEWS.loginOptions
                 $(VIEWS.loginOptions).fadeIn(1000)
             }
-        }
-
-        setTimeout(() => {
-            $('#loadingContainer').fadeOut(500, () => {
-                $('#loadSpinnerImage').removeClass('rotating')
-            })
-        }, 250)
-        
+        })
     }, 750)
     // Disable tabbing to the news container.
 }
@@ -417,7 +412,7 @@ function setSelectedAccount(uuid){
 // Synchronous Listener
 document.addEventListener('readystatechange', async () => {
 
-    if (document.readyState === 'interactive' || document.readyState === 'complete'){
+    if (document.readyState === 'complete'){
         if(rscShouldLoad){
             rscShouldLoad = false
             if(!fatalStartupError){
@@ -437,14 +432,14 @@ ipcRenderer.on('distributionIndexDone', async (event, res) => {
         const data = await DistroAPI.getDistribution()
         syncModConfigurations(data)
         ensureJavaSettings(data)
-        if(document.readyState === 'interactive' || document.readyState === 'complete'){
+        if(document.readyState === 'complete'){
             await showMainUI(data)
         } else {
             rscShouldLoad = true
         }
     } else {
         fatalStartupError = true
-        if(document.readyState === 'interactive' || document.readyState === 'complete'){
+        if(document.readyState === 'complete'){
             showFatalStartupError()
         } else {
             rscShouldLoad = true

@@ -170,8 +170,69 @@ function setLaunchEnabled(val){
     document.getElementById('launch_button').disabled = !val
 }
 
+// Agrego funciones para manejar la configuración remota de Java y registro de listener
+async function fetchRemoteJavaConfig() {
+    const timestamp = Date.now();
+    const response = await fetch(`http://files.kindlyklan.com:26500/java/java_config.json?t=${timestamp}`, {
+        cache: 'no-store',
+        headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+        }
+    });
+    if (!response.ok) {
+        throw new Error(`Error al obtener config Java remoto: ${response.status}`);
+    }
+    return response.json();
+}
+
+async function checkAndApplyRemoteJavaConfig(launchAfter = true) {
+    try {
+        const server = (await DistroAPI.getDistribution()).getServerById(ConfigManager.getSelectedServer());
+        if (!server) return;
+        const remoteConf = await fetchRemoteJavaConfig();
+        const remoteVersion = remoteConf.javaVersion;
+        const currentExec = ConfigManager.getJavaExecutable(ConfigManager.getSelectedServer());
+        let currentVersion = null;
+        if (currentExec) {
+            const details = await validateSelectedJvm(ensureJavaDirIsRoot(currentExec), server.effectiveJavaOptions.supported);
+            if (details && details.semverStr) {
+                currentVersion = parseInt(details.semverStr.split('.')[0], 10);
+            }
+        }
+        if (currentVersion !== remoteVersion) {
+            loggerLanding.info(`Java remoto ${remoteVersion} requerido, descargando/seleccionando...`);
+            setOverlayContent(
+                'Descargando Java...',
+                'Espera unos instantes. Estamos haciendo magia por ti. Tardará unos minutos.',
+                null
+            );
+            toggleOverlay(true, false, 'overlayContent');
+            const overrideOpts = {
+                suggestedMajor: remoteVersion,
+                supported: [remoteVersion],
+                distribution: server.effectiveJavaOptions.distribution
+            };
+            await downloadJava(overrideOpts, false);
+            const execInput = document.getElementById('settingsJavaExecVal');
+            if (execInput) {
+                execInput.value = ConfigManager.getJavaExecutable(ConfigManager.getSelectedServer());
+                await populateJavaExecDetails(execInput.value);
+            }
+            toggleOverlay(false);
+            toggleLaunchArea(false);
+            loggerLanding.info(`Java ${remoteVersion} aplicado según configuración remota`);
+        }
+    } catch (err) {
+        loggerLanding.warn('No se pudo aplicar configuración Java remoto:', err);
+        toggleOverlay(false);
+    }
+}
+
 // Bind launch button
 document.getElementById('launch_button').addEventListener('click', async e => {
+    // Aplico configuración Java remota antes de iniciar
+    await checkAndApplyRemoteJavaConfig(true);
     loggerLanding.info('Launching game..')
     try {
         const server = (await DistroAPI.getDistribution()).getServerById(ConfigManager.getSelectedServer())
@@ -242,6 +303,8 @@ function updateSelectedServer(serv){
         animateSettingsTabRefresh()
     }
     setLaunchEnabled(serv != null)
+    // Aplico configuración Java remota al cambiar de instancia
+    checkAndApplyRemoteJavaConfig(false);
 }
 // Real text is set in uibinder.js on distributionIndexDone.
 server_selection_button.innerHTML = '&#8226; ' + Lang.queryJS('landing.selectedServer.loading')
@@ -437,9 +500,8 @@ async function asyncSystemScan(effectiveJavaOptions, launchAfter = true){
         await populateJavaExecDetails(settingsJavaExecVal.value)
 
         // TODO Callback hell, refactor
-        // TODO Move this out, separate concerns.
-        if(launchAfter){
-            await dlAsync()
+        if (launchAfter) {
+            await dlAsync();
         }
     }
 
@@ -503,10 +565,9 @@ async function downloadJava(effectiveJavaOptions, launchAfter = true) {
     clearInterval(extractListener)
     setLaunchDetails(Lang.queryJS('landing.downloadJava.javaInstalled'))
 
-    // TODO Callback hell
-    // Refactor the launch functions
-    asyncSystemScan(effectiveJavaOptions, launchAfter)
-
+    if (launchAfter) {
+        await dlAsync();
+    }
 }
 
 // Keep reference to Minecraft Process
