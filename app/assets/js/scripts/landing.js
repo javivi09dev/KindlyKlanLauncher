@@ -113,18 +113,34 @@ async function updateLaunchButtonWhitelist(authUser) {
     
     if (!isWhitelisted) {
         loggerLanding.warn(`Usuario ${authUser.displayName} no está en la whitelist`)
-        setLaunchEnabled(false)
-        setOverlayContent(
-            Lang.queryJS('landing.whitelist.notWhitelisted') || 'No estás en la whitelist',
-            Lang.queryJS('landing.whitelist.contactAdmin') || 'Contacta al administrador para solicitar acceso al servidor.',
-            Lang.queryJS('landing.whitelist.understand') || 'Entendido'
-        )
-        setOverlayHandler(() => {
-            toggleOverlay(false)
-        })
-        toggleOverlay(true)
+        // Oculta todo el contenido principal del launcher
+        document.getElementById('main').style.display = 'none'
+        // Muestra el bloqueador con animación
+        const blocker = document.getElementById('whitelistBlocker')
+        blocker.style.display = 'flex'
+        setTimeout(() => blocker.setAttribute('visible', ''), 10)
+        // Actualiza el mensaje y descripción
+        document.querySelector('#whitelistBlockerContent h2').textContent = 'No estás en la whitelist'
+        document.querySelector('#whitelistBlockerContent p').innerHTML = `Contacta con el equipo de <b>Kindly Klan</b>.<br>Estás logeado como "${authUser.displayName}".`
+        // Asegura que la barra superior esté visible
+        document.getElementById('frameBar').style.zIndex = 10000
+        // Asigna el evento de logout
+        document.getElementById('whitelistLogoutBtn').onclick = async () => {
+            const acc = ConfigManager.getSelectedAccount()
+            if(acc) {
+                if(acc.type === 'microsoft') {
+                    await AuthManager.removeMicrosoftAccount(acc.uuid)
+                } else {
+                    await AuthManager.removeMojangAccount(acc.uuid)
+                }
+            }
+            location.reload()
+        }
+        return
     } else {
-        loggerLanding.info(`Usuario ${authUser.displayName} verificado en whitelist`)
+        // Si está en la whitelist, asegúrate de ocultar el bloqueador
+        document.getElementById('whitelistBlocker').style.display = 'none'
+        document.getElementById('main').style.display = ''
         // Solo habilitamos el botón si hay un servidor seleccionado
         const serverSelected = ConfigManager.getSelectedServer() != null
         setLaunchEnabled(serverSelected && isWhitelisted)
@@ -187,6 +203,11 @@ async function fetchRemoteJavaConfig() {
 }
 
 async function checkAndApplyRemoteJavaConfig(launchAfter = true) {
+    // Si la pantalla de whitelist está visible, no hacer nada
+    const blocker = document.getElementById('whitelistBlocker')
+    if (blocker && blocker.hasAttribute('visible')) {
+        return
+    }
     try {
         const server = (await DistroAPI.getDistribution()).getServerById(ConfigManager.getSelectedServer());
         if (!server) return;

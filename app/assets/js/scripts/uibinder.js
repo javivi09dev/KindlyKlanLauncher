@@ -83,9 +83,9 @@ async function showMainUI(data){
             $('#loadSpinnerImage').removeClass('rotating')
             // Ocultar vista de espera antes de mostrar main
             $('#waitingContainer').hide()
-            $('#main').show()
+        $('#main').show()
 
-            const isLoggedIn = Object.keys(ConfigManager.getAuthAccounts()).length > 0
+        const isLoggedIn = Object.keys(ConfigManager.getAuthAccounts()).length > 0
             if(isLoggedIn){
                 currentView = VIEWS.landing
                 $(VIEWS.landing).fadeIn(1000)
@@ -96,7 +96,7 @@ async function showMainUI(data){
                 currentView = VIEWS.loginOptions
                 $(VIEWS.loginOptions).fadeIn(1000)
             }
-        })
+            })
     }, 750)
     // Disable tabbing to the news container.
 }
