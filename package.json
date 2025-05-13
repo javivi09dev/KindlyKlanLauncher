@@ -47,10 +47,5 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/javivi09dev/KindlyKlanLauncher.git"
-  },
-  "build": {
-    "productName": "KindlyKlan Launcher",
-    "companyName": "KindlyKlan",
-    "copyright": "Copyright © 2025 KindlyKlan"
   }
 }
