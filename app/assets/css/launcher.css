@@ -2975,7 +2975,7 @@ input:checked + .toggleSwitchSlider:before {
 
 /* User profile avatar container. */
 #avatarContainer {
-    border-radius: 50%;
+    border-radius: 12px;
     border: 2px solid #cad7e1;
     box-sizing: border-box;
     background: rgba(1, 2, 1, 0.5);
@@ -2986,7 +2986,8 @@ input:checked + .toggleSwitchSlider:before {
     position: relative;
     background-position: center;
     background-repeat: no-repeat;
-    background-size: contain;
+    background-size: cover;
+    aspect-ratio: 1/1;
 }
 
 /* Avatar edit overlay. */
@@ -3006,7 +3007,7 @@ input:checked + .toggleSwitchSlider:before {
     cursor: pointer;
     width: 100%;
     height: 100%;
-    border-radius: 50%;
+    border-radius: 12px;
 }
 #avatarOverlay:hover,
 #avatarOverlay:focus {
@@ -3018,7 +3019,7 @@ input:checked + .toggleSwitchSlider:before {
 
 /* User profile name text. */
 #user_text {
-    font-size: 12px;
+    font-size: 20px;
     min-width: 135px;
     font-weight: 900;
     letter-spacing: 1px;
@@ -3051,16 +3052,47 @@ input:checked + .toggleSwitchSlider:before {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 27px;
+    height: 44px;
+    width: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    margin-bottom: 8px;
+}
+.mediaButton, .mediaURL {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    outline: none;
+    transition: box-shadow 0.2s, outline 0.2s;
+    padding: 0;
+    overflow: hidden;
+    aspect-ratio: 1/1;
+    position: relative;
+}
+.mediaSVG {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+    margin: auto;
+    padding: 0;
+    overflow: visible;
+    transform: scale(1.7);
+    transform-origin: center;
 }
 
 /* Divider bar between the external and internal icons. */
-.mediaDivider {
-    height: 1px;
-    width: 14px;
+/*.mediaDivider {
+    height: 50px;
+    width: 140px;
     background: rgb(255, 255, 255);
     margin: 10px 0px;
-}
+}*/
 
 /* Social media icon shared styles. */
 .mediaSVG {
@@ -3099,12 +3131,15 @@ input:checked + .toggleSwitchSlider:before {
 /* Settings icon colors. */
 #settingsSVG {
     stroke: #ffffff;
-    height: 15px;
+    height: px;
+    transition: 0.25s ease;
 }
 .mediaButton:hover #settingsSVG,
 .mediaButton:focus #settingsSVG,
 .mediaButton:active #settingsSVG {
-    height: 23px;
+    stroke: #956afa;
+    transform: scale(10);
+    transform: rotate(90deg);
 }
 
 /* Settings tooltip styles. */
@@ -3117,11 +3152,12 @@ input:checked + .toggleSwitchSlider:before {
     text-align: center;
     border-radius: 4px;
     position: absolute;
-    z-index: 1;
+    z-index: 9999;
     right: 130%;
     font-size: 12px;
     line-height: 20px;
     transition: visibility 0s linear 0.25s, opacity 0.25s ease;
+    pointer-events: none;
 }
 #settingsTooltip::after {
     content: " ";
@@ -4367,4 +4403,122 @@ input:checked + .toggleSwitchSlider:before {
 
 #frameBar {
     z-index: 10000 !important;
+}
+
+/* --- INICIO CAMBIO: Modo centrado y grande para barra inferior --- */
+#lower.centeredPlayMode {
+    display: flex !important;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    background: none;
+    padding-bottom: 40px;
+}
+
+#lower.centeredPlayMode > #left,
+#lower.centeredPlayMode > #center {
+    display: none !important;
+}
+
+#lower.centeredPlayMode > #right {
+    flex: 0 1 auto;
+    width: auto;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding-bottom: 0;
+}
+
+#lower.centeredPlayMode #launch_content {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    top: 0 !important;
+    position: static !important;
+}
+
+#lower.centeredPlayMode #server_selection_button {
+    font-size: 1.3em !important;
+    padding: 12px 36px !important;
+    border-radius: 10px !important;
+    margin-bottom: 18px;
+    font-weight: 600;
+    margin-top: 0;
+}
+
+#lower.centeredPlayMode #launch_button {
+    font-size: 2.2em !important;
+    padding: 24px 64px !important;
+    border-radius: 16px !important;
+    font-weight: bold;
+    background: #2e2e2e;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+    margin-bottom: 100;
+    box-shadow: 0 0 10px rgba(219, 202, 202, 0.5);
+}
+
+#lower.centeredPlayMode .bot_divider {
+    display: none !important;
+}
+
+#lower.centeredPlayMode .bot_divider_wrapper {
+    display: none !important;
+}
+
+#lower.centeredPlayMode #launch_details {
+    position: absolute;
+    right: -300px;
+    bottom: 24px;
+    margin: 0;
+    min-width: 220px;
+    max-width: 320px;
+    background: rgba(30,30,30,0.85);
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    padding: 12px 18px 12px 18px;
+    display: flex !important;
+    flex-direction: row;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s cubic-bezier(.4,0,.2,1);
+}
+#lower.centeredPlayMode #launch_details.showProgressBar {
+    opacity: 1;
+    pointer-events: auto;
+}
+#lower.centeredPlayMode #launch_details_left {
+    display: flex;
+    align-items: center;
+    margin-right: 12px;
+}
+#lower.centeredPlayMode #launch_progress_label {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #fff;
+    margin-right: 8px;
+}
+#lower.centeredPlayMode #launch_details_right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+#lower.centeredPlayMode #launch_progress {
+    width: 120px;
+    height: 6px;
+    border-radius: 4px;
+    background: #222;
+    margin-bottom: 2px;
+}
+#lower.centeredPlayMode #launch_details_text {
+    font-size: 0.95em;
+    color: #e0e0e0;
+    margin-top: 2px;
 }

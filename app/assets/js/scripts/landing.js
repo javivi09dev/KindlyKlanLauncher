@@ -44,6 +44,51 @@ const loggerLanding = LoggerUtil.getLogger('Landing')
 
 const WHITELIST_URL = 'http://files.kindlyklan.com:26500/whitelist/whitelist.json'
 
+const SERVER_STATUS_CONFIG_URL = 'http://files.kindlyklan.com:26500/whitelist/server.json'
+let hideServerAndMojangStatus = false
+
+async function fetchAndApplyServerStatusConfig() {
+    try {
+        const timestamp = Date.now()
+        const response = await fetch(`${SERVER_STATUS_CONFIG_URL}?t=${timestamp}`, {
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            }
+        })
+        if (!response.ok) throw new Error('No se pudo obtener el JSON de estado')
+        const data = await response.json()
+        hideServerAndMojangStatus = data.serverAndMojangStatus === false
+        applyServerStatusUI()
+    } catch (e) {
+        // Si hay error, mostramos los estados por defecto
+        hideServerAndMojangStatus = false
+        applyServerStatusUI()
+    }
+}
+
+function applyServerStatusUI() {
+    const lower = document.getElementById('lower')
+    const right = lower.querySelector('#right')
+    const launchContent = right.querySelector('#launch_content')
+    const launchDetails = right.querySelector('#launch_details')
+
+    if (hideServerAndMojangStatus) {
+        lower.classList.add('centeredPlayMode')
+        // Mover la barra de progreso fuera de launch_content si no está ya
+        if (launchDetails && launchDetails.parentElement === launchContent) {
+            right.appendChild(launchDetails)
+        }
+    } else {
+        lower.classList.remove('centeredPlayMode')
+        // Volver a meter la barra de progreso dentro de launch_content si no está
+        if (launchDetails && launchDetails.parentElement !== launchContent) {
+            launchContent.appendChild(launchDetails)
+        }
+    }
+}
+
 async function checkWhitelist(username) {
     try {
         loggerLanding.info('Verificando whitelist para:', username)
@@ -130,7 +175,7 @@ async function updateLaunchButtonWhitelist(authUser) {
             if(acc) {
                 if(acc.type === 'microsoft') {
                     await AuthManager.removeMicrosoftAccount(acc.uuid)
-                } else {
+    } else {
                     await AuthManager.removeMojangAccount(acc.uuid)
                 }
             }
@@ -147,13 +192,29 @@ async function updateLaunchButtonWhitelist(authUser) {
     }
 }
 
+function showProgressBarAnimated() {
+    const lower = document.getElementById('lower')
+    if (!lower.classList.contains('centeredPlayMode')) return
+    const launchDetails = lower.querySelector('#launch_details')
+    if (launchDetails) launchDetails.classList.add('showProgressBar')
+}
+function hideProgressBarAnimated() {
+    const lower = document.getElementById('lower')
+    if (!lower.classList.contains('centeredPlayMode')) return
+    const launchDetails = lower.querySelector('#launch_details')
+    if (launchDetails) launchDetails.classList.remove('showProgressBar')
+}
+
+// Modifico toggleLaunchArea para animar la barra de progreso en modo centrado
 function toggleLaunchArea(loading){
     if(loading){
         launch_details.style.display = 'flex'
         launch_content.style.display = 'none'
+        showProgressBarAnimated()
     } else {
         launch_details.style.display = 'none'
         launch_content.style.display = 'inline-flex'
+        hideProgressBarAnimated()
     }
 }
 
@@ -303,7 +364,7 @@ function updateSelectedAccount(authUser){
             username = authUser.displayName
         }
         if(authUser.uuid != null){
-            document.getElementById('avatarContainer').style.backgroundImage = `url('https://mc-heads.net/body/${authUser.uuid}/right')`
+            document.getElementById('avatarContainer').style.backgroundImage = `url('https://mc-heads.net/avatar/${authUser.uuid}/right')`
         }
         // Verificar whitelist cuando se cambia de cuenta
         updateLaunchButtonWhitelist(authUser)
@@ -326,6 +387,7 @@ function updateSelectedServer(serv){
     setLaunchEnabled(serv != null)
     // Aplico configuración Java remota al cambiar de instancia
     checkAndApplyRemoteJavaConfig(false);
+    fetchAndApplyServerStatusConfig();
 }
 // Real text is set in uibinder.js on distributionIndexDone.
 server_selection_button.innerHTML = '&#8226; ' + Lang.queryJS('landing.selectedServer.loading')
