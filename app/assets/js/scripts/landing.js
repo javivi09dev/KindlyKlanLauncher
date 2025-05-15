@@ -159,7 +159,7 @@ async function updateLaunchButtonWhitelist(authUser) {
     if (!isWhitelisted) {
         loggerLanding.warn(`Usuario ${authUser.displayName} no está en la whitelist`)
         // Oculta todo el contenido principal del launcher
-        document.getElementById('main').style.display = 'none'
+        $('#main').hide()
         // Muestra el bloqueador con animación
         const blocker = document.getElementById('whitelistBlocker')
         blocker.style.display = 'flex'
@@ -175,7 +175,7 @@ async function updateLaunchButtonWhitelist(authUser) {
             if(acc) {
                 if(acc.type === 'microsoft') {
                     await AuthManager.removeMicrosoftAccount(acc.uuid)
-    } else {
+                } else {
                     await AuthManager.removeMojangAccount(acc.uuid)
                 }
             }
@@ -184,8 +184,9 @@ async function updateLaunchButtonWhitelist(authUser) {
         return
     } else {
         // Si está en la whitelist, asegúrate de ocultar el bloqueador
+        loggerLanding.info('Usuario en whitelist, mostrando main y ocultando bloqueador')
         document.getElementById('whitelistBlocker').style.display = 'none'
-        document.getElementById('main').style.display = ''
+        $('#main').show()
         // Solo habilitamos el botón si hay un servidor seleccionado
         const serverSelected = ConfigManager.getSelectedServer() != null
         setLaunchEnabled(serverSelected && isWhitelisted)

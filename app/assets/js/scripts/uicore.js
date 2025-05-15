@@ -211,3 +211,11 @@ document.addEventListener('keydown', function (e) {
         window.toggleDevTools()
     }
 })
+
+// Mostrar la versión real del launcher en la barra superior
+window.addEventListener('DOMContentLoaded', () => {
+    const versionSpan = document.getElementById('frameVersionText')
+    if(versionSpan) {
+        versionSpan.innerText = 'v' + remote.app.getVersion()
+    }
+})

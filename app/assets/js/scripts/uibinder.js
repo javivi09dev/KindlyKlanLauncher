@@ -370,7 +370,15 @@ async function validateSelectedAccount(){
                     loginOptionsCancelEnabled(false)
                 }
                 toggleOverlay(false)
-                switchView(getCurrentView(), VIEWS.loginOptions)
+                // Refuerzo: mostrar main y vista adecuada (jQuery)
+                $('#main').show()
+                $('#waitingContainer').hide()
+                $('#overlayContainer').hide()
+                if(accLen === 0){
+                    switchView(getCurrentView(), VIEWS.loginOptions)
+                } else {
+                    switchView(getCurrentView(), VIEWS.landing)
+                }
             })
             setDismissHandler(() => {
                 if(accLen > 1){
@@ -389,9 +397,18 @@ async function validateSelectedAccount(){
             })
             toggleOverlay(true, accLen > 0)
         } else {
+            // Refuerzo: si la cuenta es válida, asegurar main visible (jQuery)
+            $('#main').show()
+            $('#waitingContainer').hide()
+            $('#overlayContainer').hide()
             return true
         }
     } else {
+        // Refuerzo: si no hay cuenta seleccionada, mostrar loginOptions (jQuery)
+        $('#main').show()
+        $('#waitingContainer').hide()
+        $('#overlayContainer').hide()
+        switchView(getCurrentView(), VIEWS.loginOptions)
         return true
     }
 }
@@ -407,6 +424,17 @@ function setSelectedAccount(uuid){
     ConfigManager.save()
     updateSelectedAccount(authAcc)
     validateSelectedAccount()
+    // Refuerzo: mostrar main y ocultar overlays/espera (jQuery)
+    $('#main').show()
+    $('#waitingContainer').hide()
+    $('#overlayContainer').hide()
+    // Si no hay cuentas, mostrar loginOptions, si hay, mostrar landing
+    const accLen = Object.keys(ConfigManager.getAuthAccounts()).length
+    if(accLen === 0){
+        switchView(getCurrentView(), VIEWS.loginOptions)
+    } else {
+        switchView(getCurrentView(), VIEWS.landing)
+    }
 }
 
 // Synchronous Listener

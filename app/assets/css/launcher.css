@@ -1082,6 +1082,8 @@ body, button {
     height: 100%;
     width: 25%;
     box-sizing: border-box;
+    /* Aumenta el espacio a la derecha para separar del contenido */
+    padding-right: 2vw;
 }
 
 /* Settings navigation container. */
@@ -1119,25 +1121,73 @@ body, button {
 
 /* Navigation item shared styles. */
 .settingsNavItem {
-    background: none;
-    border: none;
-    text-align: left;
-    margin: 5px 0px;
-    padding: 0px 20px;
-    color: grey;
+    --bezier: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --edge-light: hsla(0, 0%, 30%, 0.8);
+    --text-light: rgba(255, 255, 255, 0.4);
+    --back-color: 220, 30%;
     cursor: pointer;
-    outline: none;
-    transition: 0.25s ease;
+    padding: 0.7em 1em;
+    border-radius: 0.5em;
+    min-height: 2.4em;
+    min-width: 3em;
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+    font-size: 16px;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    font-weight: bold;
+    background: linear-gradient(
+      140deg,
+      hsla(var(--back-color), 20%, 1) min(2em, 20%),
+      hsla(var(--back-color), 20%, 0.6) min(8em, 100%)
+    );
+    color: hsla(0, 0%, 80%);
+    border: 0;
+    box-shadow: inset 0.4px 1px 4px var(--edge-light);
+    margin-bottom: 18px;
+    margin-top: 0;
+    transition: all 0.1s var(--bezier);
 }
-.settingsNavItem:hover,
-.settingsNavItem:focus {
-    color: #c1c1c1;
-    text-shadow: 0px 0px 20px #c1c1c1;
+.settingsNavItem:hover {
+    --edge-light: hsla(0, 0%, 40%, 1);
+    text-shadow: 0px 0px 10px var(--text-light);
+    box-shadow:
+      inset 0.4px 1px 4px var(--edge-light),
+      2px 4px 8px hsla(0, 0%, 0%, 0.5);
+    transform: scale(1.07);
+    color: #fff;
+}
+.settingsNavItem:active {
+    --text-light: rgba(255, 255, 255, 0.8);
+    background: linear-gradient(
+      140deg,
+      hsla(var(--back-color), 25%, 1) min(2em, 20%),
+      hsla(var(--back-color), 25%, 0.6) min(8em, 100%)
+    );
+    box-shadow:
+      inset 0.4px 1px 8px var(--edge-light),
+      0px 0px 8px hsla(var(--back-color), 30%, 0.6);
+    text-shadow: 0px 0px 20px var(--text-light);
+    color: hsla(0, 0%, 90%, 1);
+    letter-spacing: 0.1em;
+    transform: scale(1);
 }
 .settingsNavItem[selected] {
-    cursor: default;
-    color: white;
-    text-shadow: none;
+    background: linear-gradient(140deg, #2e5a8a 40%, #1e2a3a 100%);
+    color: #fff;
+    box-shadow: 0 0 0 2px #3fa7ff, 0 2px 8px #000a;
+    transform: scale(1.09);
+    z-index: 2;
+}
+.settingsNavItem .settingsNavIcon {
+    width: 1.5em;
+    height: 1.5em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.3em;
+    opacity: 0.85;
 }
 
 /* Div to add some space between nav items. */
@@ -1147,8 +1197,12 @@ body, button {
 
 /* Content container for the done button. */
 #settingsNavContentBottom {
-    position: absolute;
-    top: 65%;
+    position: fixed;
+    right: 3vw;
+    bottom: 3vw;
+    z-index: 10;
+    background: none;
+    box-shadow: none;
 }
 
 /* Settings navigational divider. */
@@ -1162,27 +1216,55 @@ body, button {
 
 /* Settings done button styles. */
 #settingsNavDone {
-    background: none;
+    background: linear-gradient(140deg, #2e5a8a 40%, #1e2a3a 100%);
+    color: #fff;
+    font-size: 1.1em;
+    font-weight: bold;
     border: none;
-    text-align: left;
-    margin: 5px 0px;
-    padding: 0px 20px;
-    color: white;
+    border-radius: 0.5em;
+    padding: 0.7em 2.2em;
+    box-shadow: 0 2px 8px #000a;
     cursor: pointer;
+    transition: all 0.15s cubic-bezier(0.22, 0.61, 0.36, 1);
     outline: none;
-    transition: 0.25s ease;
+    margin: 0;
+    min-width: 120px;
+    min-height: 2.4em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-#settingsNavDone:hover,
-#settingsNavDone:focus {
-    text-shadow: 0px 0px 20px white, 0px 0px 20px white, 0px 0px 20px white;
+#settingsNavDone:hover, #settingsNavDone:focus {
+    background: linear-gradient(140deg, #3fa7ff 40%, #2e5a8a 100%);
+    color: #fff;
+    box-shadow: 0 4px 16px #3fa7ff99;
+    transform: scale(1.07);
 }
 #settingsNavDone:active {
-    text-shadow: 0px 0px 20px rgba(255, 255, 255, 0.75), 0px 0px 20px rgba(255, 255, 255, 0.75), 0px 0px 20px rgba(255, 255, 255, 0.75);
-    color: rgba(255, 255, 255, 0.75);
+    background: linear-gradient(140deg, #1e2a3a 40%, #2e5a8a 100%);
+    color: #e0e0e0;
+    box-shadow: 0 2px 8px #000a;
+    transform: scale(1);
 }
-#settingsNavDone:disabled {
-    color: rgba(255, 255, 255, 0.75);
-    pointer-events: none;
+@media (max-width: 900px) {
+    #settingsNavContentBottom {
+        right: 2vw;
+        bottom: 2vw;
+    }
+    #settingsNavDone {
+        font-size: 1em;
+        padding: 0.7em 1.5em;
+    }
+}
+@media (max-width: 700px) {
+    #settingsNavContentBottom {
+        right: 1vw;
+        bottom: 1vw;
+    }
+    #settingsNavDone {
+        font-size: 0.95em;
+        padding: 0.7em 1.1em;
+    }
 }
 
 /* Right hand side of the settings container, for tabs. */
@@ -1190,6 +1272,8 @@ body, button {
     height: 100%;
     width: 75%;
     box-sizing: border-box;
+    /* Aumenta el espacio a la izquierda para separar del menú */
+    padding-left: 2vw;
 }
 
 /* Settings tab shared styles. */
@@ -1609,14 +1693,18 @@ input:checked + .toggleSwitchSlider:before {
 .settingsAuthAccountActions {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: flex-end;
+    gap: 10px;
     padding: 10px;
+    min-width: 90px;
+    max-width: 120px;
+    box-sizing: border-box;
 }
 
 /* Account select button shared styles. */
 .settingsAuthAccountSelect {
-    opacity: 0;
+    opacity: 1;
     border: 0;
     white-space: nowrap;
     background: none;
@@ -1635,11 +1723,12 @@ input:checked + .toggleSwitchSlider:before {
 }
 .settingsAuthAccountSelect[selected] {
     pointer-events: none;
+    display: none !important;
 }
 
 /* Account logout button shared styles. */
 .settingsAuthAccountLogOut {
-    opacity: 0;
+    opacity: 1;
     border: 1px solid rgb(241, 55, 55);
     color: rgb(241, 55, 55);
     background: none;
@@ -4521,4 +4610,33 @@ input:checked + .toggleSwitchSlider:before {
     font-size: 0.95em;
     color: #e0e0e0;
     margin-top: 2px;
+}
+
+@media (max-width: 900px) {
+    #settingsContainerLeft {
+        width: 35%;
+        padding-right: 3vw;
+    }
+    #settingsContainerRight {
+        width: 65%;
+        padding-left: 3vw;
+    }
+    .settingsNavItem {
+        font-size: 15px;
+        margin-bottom: 14px;
+    }
+}
+@media (max-width: 700px) {
+    #settingsContainerLeft {
+        width: 45%;
+        padding-right: 4vw;
+    }
+    #settingsContainerRight {
+        width: 55%;
+        padding-left: 4vw;
+    }
+    .settingsNavItem {
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
 }
