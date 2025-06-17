@@ -775,7 +775,42 @@ async function dlAsync(login = true) {
 
     if(login) {
         const authUser = ConfigManager.getSelectedAccount()
+        
+        // Validar la sesión de Microsoft antes de lanzar
+        loggerLaunchSuite.info(`Validando sesión de Microsoft para: ${authUser.displayName}`)
+        setLaunchDetails('Validando Microsoft...')
+        
+        try {
+            const isValidSession = await AuthManager.validateSelected()
+            if (!isValidSession) {
+                loggerLaunchSuite.error(`Sesión inválida para ${authUser.displayName}`)
+                showLaunchFailure(
+                    'Sesión no válida',
+                    `Tu sesión de Microsoft ha expirado. Por favor, vuelve a iniciar sesión.`
+                )
+                // Redirigir a la pantalla de login después de 3 segundos
+                setTimeout(() => {
+                    const acc = ConfigManager.getSelectedAccount()
+                    if(acc && acc.type === 'microsoft') {
+                        AuthManager.removeMicrosoftAccount(acc.uuid).then(() => {
+                            location.reload()
+                        })
+                    }
+                }, 3000)
+                return
+            }
+            loggerLaunchSuite.info('Sesión de Microsoft validada correctamente')
+        } catch(err) {
+            loggerLaunchSuite.error('Error al validar sesión de Microsoft:', err)
+            showLaunchFailure(
+                'Error de autenticación',
+                'No se pudo validar tu sesión. Por favor, reinicia el launcher e intenta de nuevo.'
+            )
+            return
+        }
+        
         loggerLaunchSuite.info(`Verificando whitelist para: ${authUser.displayName}`)
+        setLaunchDetails('Verificando acceso al servidor...')
         try {
             // Verificamos la whitelist antes de lanzar el juego
             const isWhitelisted = await checkWhitelist(authUser.displayName)
@@ -839,6 +874,11 @@ async function dlAsync(login = true) {
             }
 
             try {
+                // Abrir ventana de logs antes de iniciar el proceso
+                const { ipcRenderer } = require('electron')
+                loggerLaunchSuite.info('Abriendo ventana de logs...')
+                ipcRenderer.send('open-logs-window')
+                
                 // Build Minecraft process.
                 proc = pb.build()
                 
@@ -857,23 +897,23 @@ async function dlAsync(login = true) {
                     DiscordWrapper.initRPC(distro.rawDistribution.discord, serv.rawServer.discord)
                     hasRPC = true
                     proc.on('close', (code, signal) => {
-                        loggerLaunchSuite.info('Shutting down Discord Rich Presence..')
-                        DiscordWrapper.shutdownRPC()
-                        hasRPC = false
-                        
-                        // Calcular y guardar tiempo de juego cuando se cierra el proceso
-                        if(gameStartTime != null && currentServer != null) {
-                            const now = Date.now()
-                            const playedMinutes = Math.floor((now - gameStartTime) / 60000) // Convertir ms a minutos
-                            loggerLaunchSuite.info(`Añadiendo ${playedMinutes} minutos de tiempo de juego a ${currentServer}`)
-                            ConfigManager.addPlayTime(currentServer, playedMinutes)
-                            ConfigManager.save()
-                            gameStartTime = null
-                            currentServer = null
-                        }
-                        
-                        proc = null
-                    })
+                    loggerLaunchSuite.info('Shutting down Discord Rich Presence..')
+                    DiscordWrapper.shutdownRPC()
+                    hasRPC = false
+                    
+                    // Calcular y guardar tiempo de juego cuando se cierra el proceso
+                    if(gameStartTime != null && currentServer != null) {
+                        const now = Date.now()
+                        const playedMinutes = Math.floor((now - gameStartTime) / 60000) // Convertir ms a minutos
+                        loggerLaunchSuite.info(`Añadiendo ${playedMinutes} minutos de tiempo de juego a ${currentServer}`)
+                        ConfigManager.addPlayTime(currentServer, playedMinutes)
+                        ConfigManager.save()
+                        gameStartTime = null
+                        currentServer = null
+                    }
+                    
+                    proc = null
+                })
                 } else {
                     // Si no hay Discord RPC, todavía necesitamos rastrear el tiempo de juego
                     proc.on('close', (code, signal) => {
@@ -896,14 +936,16 @@ async function dlAsync(login = true) {
                 loggerLaunchSuite.error('Error during launch', err)
                 showLaunchFailure(Lang.queryJS('landing.dlAsync.errorDuringLaunchTitle'), Lang.queryJS('landing.dlAsync.checkConsoleForDetails'))
 
+            }
+
+        } catch (error) {
+            loggerLaunchSuite.error('Error during whitelist verification:', error)
+            showLaunchFailure(
+                Lang.queryJS('landing.whitelist.verificationError') || 'Error al verificar la whitelist',
+                Lang.queryJS('landing.whitelist.contactAdmin') || 'Contacta al administrador para más detalles.'
+            )
+            return
         }
-    } catch (error) {
-        loggerLaunchSuite.error('Error during whitelist verification:', error)
-        showLaunchFailure(
-            Lang.queryJS('landing.whitelist.verificationError') || 'Error al verificar la whitelist',
-            Lang.queryJS('landing.whitelist.contactAdmin') || 'Contacta al administrador para más detalles.'
-        )
-        return
     }
 }
 
@@ -1294,5 +1336,4 @@ async function loadNews(){
     })
 
     return await promise
-}
 }

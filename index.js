@@ -223,6 +223,7 @@ ipcMain.on(MSFT_OPCODE.OPEN_LOGOUT, (ipcEvent, uuid, isLastAccount) => {
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win
+let logsWindow = null
 
 function createWindow() {
 
@@ -258,8 +259,75 @@ function createWindow() {
 
     win.on('closed', () => {
         win = null
+        // Cerrar ventana de logs si existe
+        if (logsWindow) {
+            logsWindow.close()
+            logsWindow = null
+        }
     })
 }
+
+// Función para crear la ventana de logs
+function createLogsWindow() {
+    if (logsWindow) {
+        logsWindow.focus()
+        return logsWindow
+    }
+
+    logsWindow = new BrowserWindow({
+        width: 900,
+        height: 600,
+        icon: getPlatformIcon('SealCircle'),
+        frame: false,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false
+        },
+        resizable: true,
+        parent: win,
+        show: false,
+        backgroundColor: '#1a1a1a'
+    })
+
+    logsWindow.loadURL(pathToFileURL(path.join(__dirname, 'app', 'logs.ejs')).toString())
+
+    logsWindow.once('ready-to-show', () => {
+        logsWindow.show()
+        logsWindow.focus()
+    })
+
+    logsWindow.on('closed', () => {
+        logsWindow = null
+    })
+
+    remoteMain.enable(logsWindow.webContents)
+
+    return logsWindow
+}
+
+// Manejadores IPC para la ventana de logs
+ipcMain.on('open-logs-window', (event) => {
+    createLogsWindow()
+})
+
+ipcMain.on('close-logs-window', (event) => {
+    if (logsWindow) {
+        logsWindow.close()
+        logsWindow = null
+    }
+})
+
+ipcMain.on('game-log-data', (event, data, type) => {
+    if (logsWindow) {
+        logsWindow.webContents.send('game-log', data, type)
+    }
+})
+
+ipcMain.on('game-process-closed', (event, code) => {
+    if (logsWindow) {
+        logsWindow.webContents.send('game-closed', code)
+    }
+})
 
 function createMenu() {
     

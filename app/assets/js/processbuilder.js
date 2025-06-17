@@ -10,6 +10,15 @@ const path                  = require('path')
 
 const ConfigManager            = require('./configmanager')
 
+// Import electron for logs communication
+let ipcRenderer = null
+try {
+    const { ipcRenderer: ipc } = require('electron')
+    ipcRenderer = ipc
+} catch (err) {
+    // Electron might not be available in some contexts
+}
+
 const logger = LoggerUtil.getLogger('ProcessBuilder')
 
 
@@ -86,14 +95,33 @@ class ProcessBuilder {
         child.stderr.setEncoding('utf8')
 
         child.stdout.on('data', (data) => {
-            data.trim().split('\n').forEach(x => console.log(`\x1b[32m[Minecraft]\x1b[0m ${x}`))
-            
+            data.trim().split('\n').forEach(x => {
+                if (x.trim()) { // Solo logs no vacíos
+                    console.log(`\x1b[32m[Minecraft]\x1b[0m ${x}`)
+                    // Enviar logs a la ventana de logs
+                    if (ipcRenderer) {
+                        ipcRenderer.send('game-log-data', x, 'stdout')
+                    }
+                }
+            })
         })
         child.stderr.on('data', (data) => {
-            data.trim().split('\n').forEach(x => console.log(`\x1b[31m[Minecraft]\x1b[0m ${x}`))
+            data.trim().split('\n').forEach(x => {
+                if (x.trim()) { // Solo logs no vacíos
+                    console.log(`\x1b[31m[Minecraft]\x1b[0m ${x}`)
+                    // Enviar logs a la ventana de logs
+                    if (ipcRenderer) {
+                        ipcRenderer.send('game-log-data', x, 'stderr')
+                    }
+                }
+            })
         })
         child.on('close', (code, signal) => {
             logger.info('Exited with code', code)
+            // Notificar a la ventana de logs que el proceso ha terminado
+            if (ipcRenderer) {
+                ipcRenderer.send('game-process-closed', code)
+            }
             fs.remove(tempNativePath, (err) => {
                 if(err){
                     logger.warn('Error while deleting temp dir', err)

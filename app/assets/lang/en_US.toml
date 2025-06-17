@@ -347,3 +347,12 @@ notWhitelisted = "No estás en la whitelist."
 contactAdmin = "Contacta a <a href='https://discord.gg/kindlyklan' style='text-decoration: underline; color: inherit;'>Kindly Klan</a> mediante tickets."
 understand = "Entendido"
 verificationError = "Error al verificar la whitelist"
+
+[js.logs]
+windowTitle = "Logs de Lanzamiento - KindlyKlan Launcher"
+headerTitle = "Iniciando Minecraft - Kindly Klan Launcher"
+headerTitleFinished = "Proceso finalizado"
+initializing = "Iniciando proceso..."
+waitingForLogs = "Los logs aparecerán aquí cuando el juego comience a cargar"
+processFinished = "=== Proceso finalizado con código: {code} ==="
+logWindowInitialized = "Ventana de logs iniciada. Esperando inicio del proceso..."

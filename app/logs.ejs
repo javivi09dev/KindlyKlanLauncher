@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logs de Lanzamiento - KindlyKlan Launcher</title>
+    <style>
+        @font-face {
+            font-family: 'Avenir Book';
+            src: url('./assets/fonts/Avenir-Book.ttf');
+        }
+
+        @font-face {
+            font-family: 'Avenir Medium';
+            src: url('./assets/fonts/Avenir-Medium.ttf');
+        }
+
+        @font-face {
+            font-family: 'Montserrat-Light';
+            src: url('./assets/fonts/Montserrat-Light.otf');
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #171614 0%, #1a1a1a 50%, #0d0d0d 100%);
+            color: #ffffff;
+            font-family: 'Montserrat-Light', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('./assets/images/backgrounds/0.jpg') no-repeat center center;
+            background-size: cover;
+            opacity: 0.03;
+            z-index: -1;
+        }
+
+        .frame-bar {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 1000;
+            -webkit-app-region: drag;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #4caf50, #66bb6a);
+            margin-right: 15px;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { 
+                opacity: 1; 
+                transform: scale(1);
+                box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+            }
+            50% { 
+                opacity: 0.7; 
+                transform: scale(1.1);
+                box-shadow: 0 0 20px rgba(76, 175, 80, 0.8);
+            }
+            100% { 
+                opacity: 1; 
+                transform: scale(1);
+                box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+            }
+        }
+
+        .frame-title {
+            font-family: 'Avenir Medium', sans-serif;
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            color: #ffffff;
+            flex: 1;
+        }
+
+        .close-btn {
+            position: absolute;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-family: 'Montserrat-Light', sans-serif;
+            -webkit-app-region: no-drag;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        .close-btn:active {
+            transform: scale(0.95);
+        }
+
+        .logs-container {
+            height: calc(100vh - 65px);
+            overflow-y: auto;
+            padding: 0;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            position: relative;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .log-line {
+            padding: 12px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            transition: all 0.2s ease;
+            position: relative;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .log-line:hover {
+            background: rgba(255, 255, 255, 0.02);
+            transform: translateX(2px);
+        }
+
+        .log-line::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            transition: all 0.2s ease;
+        }
+
+        .log-line.info {
+            color: #a5d6a7;
+        }
+
+        .log-line.info::before {
+            background: linear-gradient(45deg, #4caf50, #66bb6a);
+        }
+
+        .log-line.error {
+            color: #ef5350;
+            background: rgba(244, 67, 54, 0.08);
+        }
+
+        .log-line.error::before {
+            background: linear-gradient(45deg, #f44336, #e57373);
+            box-shadow: 0 0 8px rgba(244, 67, 54, 0.4);
+        }
+
+        .log-line.warn {
+            color: #ffcc02;
+        }
+
+        .log-line.warn::before {
+            background: linear-gradient(45deg, #ff9800, #ffb74d);
+        }
+
+        .log-line.debug {
+            color: #64b5f6;
+        }
+
+        .log-line.debug::before {
+            background: linear-gradient(45deg, #2196f3, #90caf9);
+        }
+
+        .log-line.minecraft {
+            color: #81c784;
+        }
+
+        .log-line.minecraft::before {
+            background: linear-gradient(45deg, #66bb6a, #a5d6a7);
+        }
+
+        .timestamp {
+            color: rgba(255, 255, 255, 0.5);
+            margin-right: 12px;
+            font-size: 11px;
+            font-weight: 300;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .empty-state .icon {
+            font-size: 64px;
+            margin-bottom: 25px;
+            opacity: 0.6;
+            background: linear-gradient(45deg, #4caf50, #66bb6a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .empty-state h3 {
+            font-family: 'Avenir Medium', sans-serif;
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+
+        .empty-state p {
+            font-size: 13px;
+            opacity: 0.7;
+            max-width: 400px;
+            line-height: 1.4;
+        }
+
+        .auto-scroll-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: linear-gradient(45deg, #4caf50, #66bb6a);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 55px;
+            height: 55px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4);
+            transition: all 0.3s ease;
+            display: none;
+            font-size: 18px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .auto-scroll-btn:hover {
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 6px 25px rgba(76, 175, 80, 0.6);
+            background: linear-gradient(45deg, #66bb6a, #81c784);
+        }
+
+        .auto-scroll-btn:active {
+            transform: scale(0.95);
+        }
+
+        .auto-scroll-btn.visible {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Scrollbar personalizada */
+        .logs-container::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .logs-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+
+        .logs-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #4caf50, #66bb6a);
+            border-radius: 5px;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+        }
+
+        .logs-container::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #66bb6a, #81c784);
+        }
+
+        /* Animaciones de entrada */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .log-line {
+            animation: fadeInUp 0.3s ease;
+        }
+
+        /* Estados de conexión */
+        .status-indicator.finished {
+            background: linear-gradient(45deg, #f44336, #e57373);
+            box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+            animation: none;
+        }
+
+        .status-indicator.error {
+            background: linear-gradient(45deg, #f44336, #e57373);
+            box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+            animation: pulse-error 1.5s infinite;
+        }
+
+        @keyframes pulse-error {
+            0% { 
+                opacity: 1; 
+                transform: scale(1);
+                box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+            }
+            50% { 
+                opacity: 0.7; 
+                transform: scale(1.1);
+                box-shadow: 0 0 20px rgba(244, 67, 54, 0.8);
+            }
+            100% { 
+                opacity: 1; 
+                transform: scale(1);
+                box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+            }
+        }
+
+        /* Efectos especiales para logs importantes */
+        .log-line.highlight {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 4px solid #4caf50;
+            animation: highlight-glow 0.5s ease;
+        }
+
+        @keyframes highlight-glow {
+            0% {
+                box-shadow: 0 0 0 rgba(76, 175, 80, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(76, 175, 80, 0.4);
+            }
+            100% {
+                box-shadow: 0 0 0 rgba(76, 175, 80, 0.4);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="frame-bar">
+        <div class="status-indicator" id="statusIndicator"></div>
+        <h1 class="frame-title" id="frameTitle">Iniciando Minecraft - Logs en tiempo real</h1>
+        <button class="close-btn" onclick="closeWindow()">✕</button>
+    </div>
+    
+    <div class="logs-container" id="logsContainer">
+        <div class="empty-state">
+            <div class="icon">🚀</div>
+            <h3>Preparando lanzamiento</h3>
+            <p>Los logs aparecerán aquí cuando el proceso de Minecraft comience a ejecutarse. Esto puede tardar unos segundos...</p>
+        </div>
+    </div>
+
+    <button class="auto-scroll-btn" id="autoScrollBtn" onclick="scrollToBottom()">⬇</button>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+        const logsContainer = document.getElementById('logsContainer');
+        const autoScrollBtn = document.getElementById('autoScrollBtn');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const frameTitle = document.getElementById('frameTitle');
+        
+        let autoScroll = true;
+        let logCount = 0;
+
+        // Función para añadir una nueva línea de log
+        function addLogLine(data, type = 'info') {
+            // Remover el estado vacío si es la primera línea
+            if (logCount === 0) {
+                logsContainer.innerHTML = '';
+            }
+            logCount++;
+
+            const logLine = document.createElement('div');
+            const logType = getLogType(data, type);
+            logLine.className = `log-line ${logType}`;
+            
+            const timestamp = new Date().toLocaleTimeString('es-ES', { 
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                fractionalSecondDigits: 3
+            });
+            
+            // Limpiar y formatear el texto
+            const cleanData = escapeHtml(data.replace(/\x1b\[[0-9;]*m/g, ''));
+            
+            logLine.innerHTML = `<span class="timestamp">[${timestamp}]</span>${cleanData}`;
+            
+            // Añadir clase especial para logs importantes
+            if (isImportantLog(cleanData)) {
+                logLine.classList.add('highlight');
+            }
+            
+            logsContainer.appendChild(logLine);
+
+            // Auto scroll si está habilitado
+            if (autoScroll) {
+                setTimeout(() => scrollToBottom(), 50);
+            } else {
+                // Mostrar botón de scroll si no estamos en auto scroll
+                autoScrollBtn.classList.add('visible');
+            }
+
+            // Limitar número de líneas para rendimiento (mantener últimas 1000)
+            if (logCount > 1000) {
+                logsContainer.removeChild(logsContainer.firstChild);
+                logCount--;
+            }
+        }
+
+        // Función para determinar el tipo de log basado en el contenido
+        function getLogType(data, sourceType) {
+            const lowerData = data.toLowerCase();
+            
+            if (sourceType === 'stderr' || lowerData.includes('error') || lowerData.includes('exception') || lowerData.includes('failed') || lowerData.includes('fatal')) {
+                return 'error';
+            } else if (lowerData.includes('warn')) {
+                return 'warn';
+            } else if (lowerData.includes('[minecraft]') || lowerData.includes('minecraft')) {
+                return 'minecraft';
+            } else if (lowerData.includes('debug')) {
+                return 'debug';
+            }
+            return 'info';
+        }
+
+        // Función para detectar logs importantes
+        function isImportantLog(data) {
+            const importantKeywords = [
+                'initialized',
+                'starting',
+                'loaded',
+                'ready',
+                'connected',
+                'forge',
+                'fabric',
+                'modlauncher'
+            ];
+            
+            const lowerData = data.toLowerCase();
+            return importantKeywords.some(keyword => lowerData.includes(keyword));
+        }
+
+        // Escapar HTML para evitar inyección
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Scroll automático al final
+        function scrollToBottom() {
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+            autoScrollBtn.classList.remove('visible');
+            autoScroll = true;
+        }
+
+        // Detectar si el usuario ha hecho scroll manual
+        logsContainer.addEventListener('scroll', () => {
+            const isAtBottom = Math.abs(
+                logsContainer.scrollHeight - logsContainer.clientHeight - logsContainer.scrollTop
+            ) < 20;
+            
+            autoScroll = isAtBottom;
+            
+            if (isAtBottom) {
+                autoScrollBtn.classList.remove('visible');
+            } else if (logCount > 0) {
+                autoScrollBtn.classList.add('visible');
+            }
+        });
+
+        // Escuchar logs del proceso principal
+        ipcRenderer.on('game-log', (event, data, type) => {
+            addLogLine(data, type);
+        });
+
+        // Escuchar cuando el juego se cierra
+        ipcRenderer.on('game-closed', (event, code) => {
+            statusIndicator.className = 'status-indicator finished';
+            frameTitle.textContent = 'Proceso finalizado';
+            
+            addLogLine(`\n=== Proceso finalizado con código: ${code} ===`, 'info');
+            
+            // Cerrar automáticamente después de 5 segundos
+            setTimeout(() => {
+                addLogLine('Cerrando ventana en 3 segundos...', 'info');
+                setTimeout(() => closeWindow(), 3000);
+            }, 2000);
+        });
+
+        // Función para cerrar la ventana
+        function closeWindow() {
+            ipcRenderer.send('close-logs-window');
+        }
+
+        // Atajos de teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeWindow();
+            } else if (e.key === 'End') {
+                scrollToBottom();
+            } else if (e.key === 'Home') {
+                logsContainer.scrollTop = 0;
+                autoScroll = false;
+            } else if (e.ctrlKey && e.key === 'c') {
+                // Copiar logs visibles
+                const logLines = Array.from(document.querySelectorAll('.log-line'));
+                const logText = logLines.map(line => line.textContent).join('\n');
+                navigator.clipboard.writeText(logText);
+                addLogLine('Logs copiados al portapapeles', 'info');
+            }
+        });
+
+        // Mensaje inicial más atractivo
+        setTimeout(() => {
+            addLogLine('🎮 Ventana de logs iniciada - Esperando conexión con Minecraft...', 'info');
+        }, 500);
+        
+        // Simular algunos logs iniciales para mostrar el diseño
+        setTimeout(() => {
+            addLogLine('📋 Sistema de logs preparado y funcionando correctamente', 'info');
+        }, 1000);
+        
+        setTimeout(() => {
+            addLogLine('⚙️ Presiona Ctrl+C para copiar los logs al portapapeles', 'info');
+        }, 1500);
+    </script>
+</body>
+</html> 

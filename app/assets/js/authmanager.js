@@ -239,6 +239,17 @@ function calculateExpiryDate(nowMs, epiresInS) {
 }
 
 /**
+ * Check if a token will expire soon (within 5 minutes)
+ * @param {number} expiresAt Expiration timestamp
+ * @returns {boolean} True if token expires soon
+ */
+function isTokenExpiringSoon(expiresAt) {
+    const now = new Date().getTime()
+    const fiveMinutes = 5 * 60 * 1000 // 5 minutos en milisegundos
+    return (expiresAt - now) < fiveMinutes
+}
+
+/**
  * Add a Microsoft account. This will pass the provided auth code to Mojang's OAuth2.0 flow.
  * The resultant data will be stored as an auth account in the configuration database.
  * 
@@ -357,18 +368,24 @@ async function validateSelectedMicrosoftAccount(){
     const now = new Date().getTime()
     const mcExpiresAt = current.expiresAt
     const mcExpired = now >= mcExpiresAt
+    const mcExpiringSoon = isTokenExpiringSoon(mcExpiresAt)
 
-    if(!mcExpired) {
+    // Si el token no ha expirado y no expira pronto, está válido
+    if(!mcExpired && !mcExpiringSoon) {
+        log.info('Microsoft Minecraft token is valid and not expiring soon.')
         return true
     }
 
-    // MC token expired. Check MS token.
+    log.info(`Microsoft token validation needed. Expired: ${mcExpired}, ExpiringSoon: ${mcExpiringSoon}`)
 
+    // MC token expired or expiring soon. Check MS token.
     const msExpiresAt = current.microsoft.expires_at
     const msExpired = now >= msExpiresAt
+    const msExpiringSoon = isTokenExpiringSoon(msExpiresAt)
 
-    if(msExpired) {
-        // MS expired, do full refresh.
+    if(msExpired || msExpiringSoon) {
+        // MS expired or expiring soon, do full refresh.
+        log.info('Microsoft access token expired or expiring soon, performing full refresh.')
         try {
             const res = await fullMicrosoftAuthFlow(current.microsoft.refresh_token, AUTH_MODE.MS_REFRESH)
 
@@ -381,12 +398,15 @@ async function validateSelectedMicrosoftAccount(){
                 calculateExpiryDate(now, res.mcToken.expires_in)
             )
             ConfigManager.save()
+            log.info('Microsoft tokens refreshed successfully.')
             return true
         } catch(err) {
+            log.error('Failed to refresh Microsoft tokens:', err)
             return false
         }
     } else {
-        // Only MC expired, use existing MS token.
+        // Only MC expired/expiring, use existing MS token.
+        log.info('Only Minecraft token needs refresh, using existing Microsoft token.')
         try {
             const res = await fullMicrosoftAuthFlow(current.microsoft.access_token, AUTH_MODE.MC_REFRESH)
 
@@ -399,9 +419,11 @@ async function validateSelectedMicrosoftAccount(){
                 calculateExpiryDate(now, res.mcToken.expires_in)
             )
             ConfigManager.save()
+            log.info('Minecraft token refreshed successfully.')
             return true
         }
         catch(err) {
+            log.error('Failed to refresh Minecraft token:', err)
             return false
         }
     }

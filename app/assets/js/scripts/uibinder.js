@@ -317,19 +317,54 @@ function mergeModConfiguration(o, n, nReq = false){
 async function validateSelectedAccount(){
     const selectedAcc = ConfigManager.getSelectedAccount()
     if(selectedAcc != null){
-        const val = await AuthManager.validateSelected()
-        if(!val){
+        console.log(`[AuthValidation] Validando cuenta: ${selectedAcc.displayName} (${selectedAcc.type})`)
+        
+        let val = false
+        try {
+            val = await AuthManager.validateSelected()
+            if(!val){
+                console.log(`[AuthValidation] Cuenta inválida para ${selectedAcc.displayName}`)
+                ConfigManager.removeAuthAccount(selectedAcc.uuid)
+                ConfigManager.save()
+                const accLen = Object.keys(ConfigManager.getAuthAccounts()).length
+                
+                // Mensaje específico para cuentas de Microsoft
+                const errorTitle = selectedAcc.type === 'microsoft' 
+                    ? 'Sesión de Microsoft expirada'
+                    : Lang.queryJS('uibinder.validateAccount.failedMessageTitle')
+                    
+                const errorDesc = selectedAcc.type === 'microsoft'
+                    ? `Tu sesión de Microsoft para "${selectedAcc.displayName}" ha expirado. Por favor, vuelve a iniciar sesión.`
+                    : accLen > 0
+                        ? Lang.queryJS('uibinder.validateAccount.failedMessage', { 'account': selectedAcc.displayName })
+                        : Lang.queryJS('uibinder.validateAccount.failedMessageSelectAnotherAccount', { 'account': selectedAcc.displayName })
+                
+                setOverlayContent(
+                    errorTitle,
+                    errorDesc,
+                    Lang.queryJS('uibinder.validateAccount.loginButton'),
+                    Lang.queryJS('uibinder.validateAccount.selectAnotherAccountButton')
+                )
+            } else {
+                console.log(`[AuthValidation] Cuenta validada correctamente: ${selectedAcc.displayName}`)
+            }
+        } catch(err) {
+            console.error(`[AuthValidation] Error validando cuenta ${selectedAcc.displayName}:`, err)
+            // Si hay error en la validación, tratamos como cuenta inválida
+            val = false
             ConfigManager.removeAuthAccount(selectedAcc.uuid)
             ConfigManager.save()
             const accLen = Object.keys(ConfigManager.getAuthAccounts()).length
             setOverlayContent(
-                Lang.queryJS('uibinder.validateAccount.failedMessageTitle'),
-                accLen > 0
-                    ? Lang.queryJS('uibinder.validateAccount.failedMessage', { 'account': selectedAcc.displayName })
-                    : Lang.queryJS('uibinder.validateAccount.failedMessageSelectAnotherAccount', { 'account': selectedAcc.displayName }),
+                'Error de autenticación',
+                `No se pudo validar tu cuenta "${selectedAcc.displayName}". Por favor, vuelve a iniciar sesión.`,
                 Lang.queryJS('uibinder.validateAccount.loginButton'),
                 Lang.queryJS('uibinder.validateAccount.selectAnotherAccountButton')
             )
+        }
+        
+        if(!val){
+            const accLen = Object.keys(ConfigManager.getAuthAccounts()).length
             setOverlayHandler(() => {
 
                 const isMicrosoft = selectedAcc.type === 'microsoft'
@@ -437,6 +472,47 @@ function setSelectedAccount(uuid){
     }
 }
 
+// Función para validar proactivamente todas las cuentas Microsoft
+async function proactivelyValidateMicrosoftAccounts() {
+    const accounts = ConfigManager.getAuthAccounts()
+    const microsoftAccounts = Object.values(accounts).filter(acc => acc.type === 'microsoft')
+    
+    if (microsoftAccounts.length === 0) {
+        return
+    }
+    
+    console.log(`[AuthValidation] Validación proactiva de ${microsoftAccounts.length} cuenta(s) de Microsoft...`)
+    
+    for (const account of microsoftAccounts) {
+        try {
+            const currentSelected = ConfigManager.getSelectedAccount()
+            
+            // Temporalmente seleccionar la cuenta para validarla
+            ConfigManager.setSelectedAccount(account.uuid)
+            
+            const isValid = await AuthManager.validateSelected()
+            if (!isValid) {
+                console.log(`[AuthValidation] Cuenta ${account.displayName} marcada como inválida y removida`)
+                ConfigManager.removeAuthAccount(account.uuid)
+            } else {
+                console.log(`[AuthValidation] Cuenta ${account.displayName} validada proactivamente`)
+            }
+            
+            // Restaurar la cuenta seleccionada original si aún existe
+            if (currentSelected && ConfigManager.getAuthAccount(currentSelected.uuid)) {
+                ConfigManager.setSelectedAccount(currentSelected.uuid)
+            }
+            
+        } catch (err) {
+            console.error(`[AuthValidation] Error validando cuenta ${account.displayName}:`, err)
+            ConfigManager.removeAuthAccount(account.uuid)
+        }
+    }
+    
+    ConfigManager.save()
+    console.log(`[AuthValidation] Validación proactiva completada`)
+}
+
 // Synchronous Listener
 document.addEventListener('readystatechange', async () => {
 
@@ -445,6 +521,10 @@ document.addEventListener('readystatechange', async () => {
             rscShouldLoad = false
             if(!fatalStartupError){
                 const data = await DistroAPI.getDistribution()
+                
+                // Validar proactivamente las cuentas de Microsoft antes de mostrar la UI
+                await proactivelyValidateMicrosoftAccounts()
+                
                 await showMainUI(data)
             } else {
                 showFatalStartupError()
