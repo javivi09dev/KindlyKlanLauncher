@@ -30,6 +30,7 @@ const {
 // Internal Requirements
 const DiscordWrapper          = require('./assets/js/discordwrapper')
 const ProcessBuilder          = require('./assets/js/processbuilder')
+const { proxyInstance }       = require('./assets/js/tcpproxy')
 
 // Launch Elements
 const launch_content          = document.getElementById('launch_content')
@@ -389,6 +390,10 @@ function updateSelectedServer(serv){
     // Aplico configuración Java remota al cambiar de instancia
     checkAndApplyRemoteJavaConfig(false);
     fetchAndApplyServerStatusConfig();
+    // Reiniciar proxy TCP con nueva configuración si es necesario
+    proxyInstance.restartProxy().catch(err => {
+        loggerLanding.warn('Error al reiniciar proxy TCP:', err)
+    });
 }
 // Real text is set in uibinder.js on distributionIndexDone.
 server_selection_button.innerHTML = '&#8226; ' + Lang.queryJS('landing.selectedServer.loading')
@@ -639,7 +644,6 @@ async function downloadJava(effectiveJavaOptions, launchAfter = true) {
 
     const newJavaExec = await extractJdk(asset.path)
 
-    // Extraction complete, remove the loading from the OS progress bar.
     remote.getCurrentWindow().setProgressBar(-1)
 
     // Extraction completed successfully.
@@ -654,23 +658,28 @@ async function downloadJava(effectiveJavaOptions, launchAfter = true) {
     }
 }
 
-// Keep reference to Minecraft Process
 let proc
-// Is DiscordRPC enabled
 let hasRPC = false
-// Variables para el registro de tiempo de juego
 let gameStartTime = null
 let currentServer = null
-// Joined server regex
-// Change this if your server uses something different.
+
+function isMinecraftRunning() {
+    return proc !== null && proc !== undefined && !proc.killed
+}
+
+
+const { ipcRenderer: ipc } = require('electron')
+ipc.on('check-minecraft-process', () => {
+    const isRunning = isMinecraftRunning()
+    ipc.send('minecraft-process-status', isRunning)
+})
+
 const GAME_JOINED_REGEX = /\[.+\]: Sound engine started/
 const GAME_LAUNCH_REGEX = /^\[.+\]: (?:MinecraftForge .+ Initialized|ModLauncher .+ starting: .+|Loading Minecraft .+ with Fabric Loader .+)$/
 const MIN_LINGER = 5000
 
 async function dlAsync(login = true) {
 
-    // Login parameter is temporary for debug purposes. Allows testing the validation/downloads without
-    // launching the game.
 
     const loggerLaunchSuite = LoggerUtil.getLogger('LaunchSuite')
 
@@ -810,7 +819,7 @@ async function dlAsync(login = true) {
         }
         
         loggerLaunchSuite.info(`Verificando whitelist para: ${authUser.displayName}`)
-        setLaunchDetails('Verificando acceso al servidor...')
+        setLaunchDetails('Verificando acceso...')
         try {
             // Verificamos la whitelist antes de lanzar el juego
             const isWhitelisted = await checkWhitelist(authUser.displayName)
@@ -912,7 +921,9 @@ async function dlAsync(login = true) {
                         currentServer = null
                     }
                     
+                    // Limpiar referencia del proceso
                     proc = null
+                    loggerLaunchSuite.info('Proceso de Minecraft terminado, referencia limpiada')
                 })
                 } else {
                     // Si no hay Discord RPC, todavía necesitamos rastrear el tiempo de juego
@@ -928,7 +939,9 @@ async function dlAsync(login = true) {
                             currentServer = null
                         }
                         
+                        // Limpiar referencia del proceso
                         proc = null
+                        loggerLaunchSuite.info('Proceso de Minecraft terminado, referencia limpiada')
                     })
                 }
             } catch(err) {

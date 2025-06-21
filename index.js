@@ -108,6 +108,125 @@ ipcMain.handle(SHELL_OPCODE.TRASH_ITEM, async (event, ...args) => {
 // https://electronjs.org/docs/tutorial/offscreen-rendering
 app.disableHardwareAcceleration()
 
+// Variable para controlar si se permite cerrar la app
+let allowAppQuit = false
+let closeTimeout = null
+
+// Interceptar cierre de aplicación
+app.on('before-quit', async (event) => {
+    if (allowAppQuit) {
+        // Limpieza final del proxy cuando se permite el cierre
+        try {
+            const proxyPath = path.join(__dirname, 'app', 'assets', 'js', 'tcpproxy.js')
+                    if (fs.existsSync(proxyPath)) {
+            const { proxyInstance } = require('./app/assets/js/tcpproxy')
+            if (proxyInstance && proxyInstance.isRunning) {
+                await proxyInstance.stopProxy()
+            }
+        }
+        } catch (err) {
+            console.warn('Error al detener proxy TCP:', err)
+        }
+        return
+    }
+
+    // Prevenir cierre automático para verificar estado de Minecraft
+    event.preventDefault()
+    
+    // Verificar si hay procesos de Minecraft corriendo y mostrar advertencia
+    checkMinecraftProcessAndShowWarning()
+})
+
+// Función para verificar procesos de Minecraft y mostrar advertencia
+function checkMinecraftProcessAndShowWarning() {
+    // Usar la variable global 'win' que ya existe en el código
+    const targetWindow = win && !win.isDestroyed() ? win : null
+    
+    if (!targetWindow) {
+        allowAppQuit = true
+        app.quit()
+        return
+    }
+
+    // Verificar que la ventana tenga webContents válidos
+    if (!targetWindow.webContents || targetWindow.webContents.isDestroyed()) {
+        allowAppQuit = true
+        app.quit()
+        return
+    }
+
+    // Limpiar timeout anterior si existe
+    if (closeTimeout) {
+        clearTimeout(closeTimeout)
+        closeTimeout = null
+    }
+    
+    // Enviar evento al renderer para verificar si Minecraft está corriendo
+    targetWindow.webContents.send('check-minecraft-process')
+    
+    // Timeout de seguridad en caso de que no haya respuesta
+    closeTimeout = setTimeout(() => {
+        closeTimeout = null
+        performAppQuit()
+    }, 5000) // 5 segundos de espera máxima
+}
+
+// Escuchar respuesta del renderer sobre el estado de Minecraft
+ipcMain.on('minecraft-process-status', (event, isRunning) => {
+    // Limpiar timeout ya que recibimos respuesta
+    if (closeTimeout) {
+        clearTimeout(closeTimeout)
+        closeTimeout = null
+    }
+    
+    if (isRunning) {
+        // Mostrar diálogo de advertencia
+        showMinecraftRunningWarning(event.sender)
+    } else {
+        // Minecraft no está corriendo, cerrar normalmente
+        performAppQuit()
+    }
+})
+
+// Mostrar advertencia cuando Minecraft está corriendo
+function showMinecraftRunningWarning(webContents) {
+    const { dialog } = require('electron')
+    const mainWindow = BrowserWindow.fromWebContents(webContents)
+    
+    dialog.showMessageBox(mainWindow, {
+        type: 'warning',
+        title: 'Minecraft está ejecutándose',
+        message: '¡Atención! Minecraft está corriendo',
+        detail: 'Si cierras el launcher ahora, perderás la conexión al servidor porque el proxy TCP se detendrá.\n\n¿Estás seguro de que quieres cerrar el launcher?',
+        buttons: [
+            'Cancelar',
+            'Cerrar de todas formas'
+        ],
+        defaultId: 0, // Botón por defecto es "Cancelar"
+        cancelId: 0,   // Botón de cancelar es "Cancelar"
+        icon: path.join(__dirname, 'app', 'assets', 'images', 'SealCircle.png')
+    }).then(result => {
+        if (result.response === 1) { // Usuario eligió "Cerrar de todas formas"
+            performAppQuit()
+        }
+        // Si eligió cancelar (0), no hacer nada
+    }).catch(err => {
+        // Si hay error mostrando el diálogo, cerrar normalmente
+        performAppQuit()
+    })
+}
+
+// Función para cerrar la aplicación de forma segura
+function performAppQuit() {
+    allowAppQuit = true
+    app.quit()
+}
+
+// Escuchar eventos desde renderer para forzar cierre
+ipcMain.on('force-app-quit', () => {
+    performAppQuit()
+})
+
 
 const REDIRECT_URI_PREFIX = 'https://login.microsoftonline.com/common/oauth2/nativeclient?'
 
@@ -256,6 +375,16 @@ function createWindow() {
     win.removeMenu()
 
     win.resizable = true
+
+    win.on('close', (event) => {
+        if (allowAppQuit) {
+            return
+        }
+        
+        // Prevenir cierre de ventana
+        event.preventDefault()
+        checkMinecraftProcessAndShowWarning()
+    })
 
     win.on('closed', () => {
         win = null

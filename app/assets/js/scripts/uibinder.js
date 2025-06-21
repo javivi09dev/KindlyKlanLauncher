@@ -75,6 +75,17 @@ async function showMainUI(data){
         console.warn('Error al aplicar config Java remoto:', err)
     }
 
+    // Inicializar proxy TCP
+    try {
+        const { proxyInstance } = require('./assets/js/tcpproxy')
+        const configOk = await proxyInstance.fetchProxyConfig()
+        if (configOk) {
+            await proxyInstance.startProxy()
+        }
+    } catch (err) {
+        console.warn('Error al inicializar proxy TCP:', err)
+    }
+
     setTimeout(() => {
         document.getElementById('frameBar').style.backgroundColor = 'rgba(0, 0, 0, 0.5)'
         document.body.style.backgroundImage = `url('assets/images/backgrounds/${document.body.getAttribute('bkid')}.jpg')`

@@ -1250,7 +1250,7 @@ body, button {
     #settingsNavContentBottom {
         right: 2vw;
         bottom: 2vw;
-    }
+}
     #settingsNavDone {
         font-size: 1em;
         padding: 0.7em 1.5em;
@@ -4157,40 +4157,181 @@ input:checked + .toggleSwitchSlider:before {
     left: 52%;
     transform: translateX(-50%);
 }
-.loaderprincipal {
+/* Nuevo loader con logo animado */
+.loader-logo-container {
     position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
   
-  .loaderprincipal span {
+.logo-animation-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.animated-logo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    animation: 
+        logoSpin 4s linear infinite,
+        logoFloat 3s ease-in-out infinite;
+    position: relative;
+    z-index: 2;
+}
+
+/* Texto con efecto glitch cyberpunk */
+.glitch-container {
+    position: relative;
+    font-family: "Orbitron", sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: #00ffff;
+    margin-top: 25px;
+    text-shadow:
+        0.05em 0 0 #ff00ff,
+        -0.03em -0.04em 0 #ffff00,
+        0.025em 0.04em 0 #00ffff;
+    animation: glitch 725ms infinite;
+}
+
+.glitch-container span {
     position: absolute;
-    color: #fff;
-    transform: translate(-50%, -50%);
-    font-size: 38px;
-    letter-spacing: 5px;
-  }
+    top: 0;
+    left: 0;
+}
+
+.glitch-container span:first-child {
+    animation: glitch 500ms infinite;
+    clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+    transform: translate(-0.04em, -0.03em);
+    opacity: 0.75;
+}
+
+.glitch-container span:last-child {
+    animation: glitch 375ms infinite;
+    clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+    transform: translate(0.04em, 0.03em);
+    opacity: 0.75;
+}
   
-  .loaderprincipal span:nth-child(1) {
-    color: transparent;
-    -webkit-text-stroke: 0.3px rgb(128, 198, 255);
-  }
-  
-  .loaderprincipal span:nth-child(2) {
-    color: rgb(128, 198, 255);
-    -webkit-text-stroke: 1px rgb(128, 198, 255);
-    animation: uiverse723 3s ease-in-out infinite;
-  }
-  
-  @keyframes uiverse723 {
-    0%, 100% {
-      clip-path: polygon(0% 45%, 15% 44%, 32% 50%, 
-       54% 60%, 70% 61%, 84% 59%, 100% 52%, 100% 100%, 0% 100%);
+/* Animación de rotación cyberpunk */
+@keyframes logoSpin {
+    0% { 
+        transform: rotate(0deg) scale(1);
+        filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.4));
     }
-  
+    25% {
+        transform: rotate(90deg) scale(1.05);
+        filter: drop-shadow(0 0 20px rgba(255, 0, 255, 0.5));
+    }
     50% {
-      clip-path: polygon(0% 60%, 16% 65%, 34% 66%, 
-       51% 62%, 67% 50%, 84% 45%, 100% 46%, 100% 100%, 0% 100%);
+        transform: rotate(180deg) scale(1);
+        filter: drop-shadow(0 0 25px rgba(255, 255, 0, 0.4));
     }
-  }
+    75% {
+        transform: rotate(270deg) scale(1.05);
+        filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5));
+    }
+    100% { 
+        transform: rotate(360deg) scale(1);
+        filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.4));
+    }
+}
+
+/* Animación de flotación vertical */
+@keyframes logoFloat {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-15px);
+    }
+}
+
+/* Animación del efecto glitch */
+@keyframes glitch {
+    0% {
+        text-shadow:
+            0.05em 0 0 #ff00ff,
+            -0.03em -0.04em 0 #ffff00,
+            0.025em 0.04em 0 #00ffff;
+    }
+    15% {
+        text-shadow:
+            0.05em 0 0 #ff00ff,
+            -0.03em -0.04em 0 #ffff00,
+            0.025em 0.04em 0 #00ffff;
+    }
+    16% {
+        text-shadow:
+            -0.05em -0.025em 0 #ff00ff,
+            0.025em 0.035em 0 #ffff00,
+            -0.05em -0.05em 0 #00ffff;
+    }
+    49% {
+        text-shadow:
+            -0.05em -0.025em 0 #ff00ff,
+            0.025em 0.035em 0 #ffff00,
+            -0.05em -0.05em 0 #00ffff;
+    }
+    50% {
+        text-shadow:
+            0.05em 0.035em 0 #ff00ff,
+            0.03em 0 0 #ffff00,
+            0 -0.04em 0 #00ffff;
+    }
+    99% {
+        text-shadow:
+            0.05em 0.035em 0 #ff00ff,
+            0.03em 0 0 #ffff00,
+            0 -0.04em 0 #00ffff;
+    }
+    100% {
+        text-shadow:
+            -0.05em 0 0 #ff00ff,
+            -0.025em -0.04em 0 #ffff00,
+            -0.04em -0.025em 0 #00ffff;
+    }
+}
+
+/* Efecto de resplandor de fondo cyberpunk */
+.logo-animation-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(
+        circle,
+        rgba(0, 255, 255, 0.08) 0%,
+        rgba(255, 0, 255, 0.04) 50%,
+        transparent 100%
+    );
+    transform: translate(-50%, -50%);
+    animation: cyberpunkGlow 3s ease-in-out infinite alternate;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+@keyframes cyberpunkGlow {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.2;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.4;
+    }
+}
 
 .loader {
     color: rgb(124, 124, 124);
