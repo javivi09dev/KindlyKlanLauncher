@@ -10,3 +10,4 @@ app/assets/images/images.zip
 
 
 *.MD
+.env
