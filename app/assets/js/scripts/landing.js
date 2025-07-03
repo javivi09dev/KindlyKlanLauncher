@@ -31,6 +31,7 @@ const {
 const DiscordWrapper          = require('./assets/js/discordwrapper')
 const ProcessBuilder          = require('./assets/js/processbuilder')
 const { proxyInstance }       = require('./assets/js/tcpproxy')
+const { EnhancedDownloadManager } = require('./assets/js/downloadmanager')
 
 // Launch Elements
 const launch_content          = document.getElementById('launch_content')
@@ -46,6 +47,9 @@ const loggerLanding = LoggerUtil.getLogger('Landing')
 const WHITELIST_URL = 'http://files.kindlyklan.com:26500/whitelist/whitelist.json'
 
 const SERVER_STATUS_CONFIG_URL = 'http://files.kindlyklan.com:26500/whitelist/server.json'
+
+const { getConfigForDownloadType } = require('./assets/js/downloadconfig')
+const downloadManager = new EnhancedDownloadManager(getConfigForDownloadType('default'))
 let hideServerAndMojangStatus = false
 
 async function fetchAndApplyServerStatusConfig() {
@@ -63,7 +67,6 @@ async function fetchAndApplyServerStatusConfig() {
         hideServerAndMojangStatus = data.serverAndMojangStatus === false
         applyServerStatusUI()
     } catch (e) {
-        // Si hay error, mostramos los estados por defecto
         hideServerAndMojangStatus = false
         applyServerStatusUI()
     }
@@ -77,13 +80,11 @@ function applyServerStatusUI() {
 
     if (hideServerAndMojangStatus) {
         lower.classList.add('centeredPlayMode')
-        // Mover la barra de progreso fuera de launch_content si no está ya
         if (launchDetails && launchDetails.parentElement === launchContent) {
             right.appendChild(launchDetails)
         }
     } else {
         lower.classList.remove('centeredPlayMode')
-        // Volver a meter la barra de progreso dentro de launch_content si no está
         if (launchDetails && launchDetails.parentElement !== launchContent) {
             launchContent.appendChild(launchDetails)
         }
@@ -168,9 +169,7 @@ async function updateLaunchButtonWhitelist(authUser) {
         // Actualiza el mensaje y descripción
         document.querySelector('#whitelistBlockerContent h2').textContent = 'No estás en la whitelist'
         document.querySelector('#whitelistBlockerContent p').innerHTML = `Contacta con el equipo de <b>Kindly Klan</b>.<br>Estás logeado como "${authUser.displayName}".`
-        // Asegura que la barra superior esté visible
         document.getElementById('frameBar').style.zIndex = 10000
-        // Asigna el evento de logout
         document.getElementById('whitelistLogoutBtn').onclick = async () => {
             const acc = ConfigManager.getSelectedAccount()
             if(acc) {
@@ -184,11 +183,9 @@ async function updateLaunchButtonWhitelist(authUser) {
         }
         return
     } else {
-        // Si está en la whitelist, asegúrate de ocultar el bloqueador
         loggerLanding.info('Usuario en whitelist, mostrando main y ocultando bloqueador')
         document.getElementById('whitelistBlocker').style.display = 'none'
         $('#main').show()
-        // Solo habilitamos el botón si hay un servidor seleccionado
         const serverSelected = ConfigManager.getSelectedServer() != null
         setLaunchEnabled(serverSelected && isWhitelisted)
     }
@@ -207,7 +204,6 @@ function hideProgressBarAnimated() {
     if (launchDetails) launchDetails.classList.remove('showProgressBar')
 }
 
-// Modifico toggleLaunchArea para animar la barra de progreso en modo centrado
 function toggleLaunchArea(loading){
     if(loading){
         launch_details.style.display = 'flex'
@@ -368,7 +364,6 @@ function updateSelectedAccount(authUser){
         if(authUser.uuid != null){
             document.getElementById('avatarContainer').style.backgroundImage = `url('https://mc-heads.net/avatar/${authUser.uuid}/right')`
         }
-        // Verificar whitelist cuando se cambia de cuenta
         updateLaunchButtonWhitelist(authUser)
     }
     user_text.innerHTML = username
@@ -609,19 +604,39 @@ async function downloadJava(effectiveJavaOptions, launchAfter = true) {
         throw new Error(Lang.queryJS('landing.downloadJava.findJdkFailure'))
     }
 
-    let received = 0
-    await downloadFile(asset.url, asset.path, ({ transferred }) => {
-        received = transferred
-        setDownloadPercentage(Math.trunc((transferred/asset.size)*100))
-    })
-    setDownloadPercentage(100)
-
-    if(received != asset.size) {
-        loggerLanding.warn(`Java Download: Expected ${asset.size} bytes but received ${received}`)
+    // Usar el gestor de descargas mejorado para Java
+    try {
+        await downloadManager.downloadWithRetry(
+            asset.url, 
+            asset.path, 
+            ({ transferred }) => {
+                setDownloadPercentage(Math.trunc((transferred/asset.size)*100))
+            }
+        )
+        setDownloadPercentage(100)
+        
+        // Validar el archivo descargado
         if(!await validateLocalFile(asset.path, asset.algo, asset.hash)) {
-            log.error(`Hashes do not match, ${asset.id} may be corrupted.`)
-            // Don't know how this could happen, but report it.
+            loggerLanding.error(`Java download hash validation failed for ${asset.id}`)
             throw new Error(Lang.queryJS('landing.downloadJava.javaDownloadCorruptedError'))
+        }
+        
+    } catch (err) {
+        loggerLanding.error('Java download failed with enhanced manager, trying fallback:', err.message)
+        
+        let received = 0
+        await downloadFile(asset.url, asset.path, ({ transferred }) => {
+            received = transferred
+            setDownloadPercentage(Math.trunc((transferred/asset.size)*100))
+        })
+        setDownloadPercentage(100)
+
+        if(received != asset.size) {
+            loggerLanding.warn(`Java Download: Expected ${asset.size} bytes but received ${received}`)
+            if(!await validateLocalFile(asset.path, asset.algo, asset.hash)) {
+                loggerLanding.error(`Hashes do not match, ${asset.id} may be corrupted.`)
+                throw new Error(Lang.queryJS('landing.downloadJava.javaDownloadCorruptedError'))
+            }
         }
     }
 
@@ -730,33 +745,72 @@ async function dlAsync(login = true) {
         }
     })
 
+    setLaunchDetails('Optimizando red...')
+    try {
+        await downloadManager.optimizeConfig()
+    } catch (err) {
+        loggerLaunchSuite.warn('No se pudo optimizar configuración de red:', err.message)
+    }
+
     loggerLaunchSuite.info('Validating files.')
     setLaunchDetails(Lang.queryJS('landing.dlAsync.validatingFileIntegrity'))
     let invalidFileCount = 0
+    
     try {
-        invalidFileCount = await fullRepairModule.verifyFiles(percent => {
+        const validationPromise = fullRepairModule.verifyFiles(percent => {
             setLaunchPercentage(percent)
         })
+        
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Validation timeout')), 120000)
+        })
+        
+        invalidFileCount = await Promise.race([validationPromise, timeoutPromise])
         setLaunchPercentage(100)
     } catch (err) {
-        loggerLaunchSuite.error('Error during file validation.')
-        showLaunchFailure(Lang.queryJS('landing.dlAsync.errorDuringFileVerificationTitle'), err.displayable || Lang.queryJS('landing.dlAsync.seeConsoleForDetails'))
+        loggerLaunchSuite.error('Error during file validation:', err.message)
+        if (err.message === 'Validation timeout') {
+            showLaunchFailure('Validación demorada', 'La validación de archivos está tomando demasiado tiempo. Inténtalo de nuevo o contacta soporte.')
+        } else {
+            showLaunchFailure(Lang.queryJS('landing.dlAsync.errorDuringFileVerificationTitle'), err.displayable || Lang.queryJS('landing.dlAsync.seeConsoleForDetails'))
+        }
         return
     }
     
 
     if(invalidFileCount > 0) {
-        loggerLaunchSuite.info('Downloading files.')
-        setLaunchDetails(Lang.queryJS('landing.dlAsync.downloadingFiles'))
+        loggerLaunchSuite.info(`Downloading ${invalidFileCount} files with enhanced manager.`)
+        setLaunchDetails(`${Lang.queryJS('landing.dlAsync.downloadingFiles')} (${invalidFileCount} archivos)`)
         setLaunchPercentage(0)
+        
         try {
+            try {
+                await downloadManager.downloadWithRetry(
+                    'test-url',
+                    'test-path',
+                    (progress) => setDownloadPercentage(progress.percent || 0)
+                )
+                loggerLaunchSuite.info('Enhanced download manager disponible')
+            } catch (testErr) {
+                loggerLaunchSuite.warn('Enhanced download manager no disponible, usando sistema original')
+            }
+            
             await fullRepairModule.download(percent => {
                 setDownloadPercentage(percent)
             })
             setDownloadPercentage(100)
+            
         } catch(err) {
-            loggerLaunchSuite.error('Error during file download.')
-            showLaunchFailure(Lang.queryJS('landing.dlAsync.errorDuringFileDownloadTitle'), err.displayable || Lang.queryJS('landing.dlAsync.seeConsoleForDetails'))
+            loggerLaunchSuite.error('Error during file download:', err.message)
+            
+            let errorMessage = Lang.queryJS('landing.dlAsync.seeConsoleForDetails')
+            if (err.message.includes('timeout')) {
+                errorMessage = 'La descarga se agotó el tiempo. Verifica tu conexión a internet e inténtalo de nuevo.'
+            } else if (err.message.includes('ENOTFOUND') || err.message.includes('ECONNREFUSED')) {
+                errorMessage = 'No se pudo conectar al servidor. Verifica tu conexión a internet.'
+            }
+            
+            showLaunchFailure(Lang.queryJS('landing.dlAsync.errorDuringFileDownloadTitle'), errorMessage)
             return
         }
     } else {
@@ -785,7 +839,6 @@ async function dlAsync(login = true) {
     if(login) {
         const authUser = ConfigManager.getSelectedAccount()
         
-        // Validar la sesión de Microsoft antes de lanzar
         loggerLaunchSuite.info(`Validando sesión de Microsoft para: ${authUser.displayName}`)
         setLaunchDetails('Validando Microsoft...')
         
@@ -797,7 +850,6 @@ async function dlAsync(login = true) {
                     'Sesión no válida',
                     `Tu sesión de Microsoft ha expirado. Por favor, vuelve a iniciar sesión.`
                 )
-                // Redirigir a la pantalla de login después de 3 segundos
                 setTimeout(() => {
                     const acc = ConfigManager.getSelectedAccount()
                     if(acc && acc.type === 'microsoft') {
@@ -821,7 +873,6 @@ async function dlAsync(login = true) {
         loggerLaunchSuite.info(`Verificando whitelist para: ${authUser.displayName}`)
         setLaunchDetails('Verificando acceso...')
         try {
-            // Verificamos la whitelist antes de lanzar el juego
             const isWhitelisted = await checkWhitelist(authUser.displayName)
             if (!isWhitelisted) {
                 loggerLaunchSuite.error(`Usuario ${authUser.displayName} no está en la whitelist`)
@@ -835,7 +886,6 @@ async function dlAsync(login = true) {
             loggerLaunchSuite.info(`Enviando cuenta seleccionada (${authUser.displayName}) a ProcessBuilder.`)
             let pb = new ProcessBuilder(serv, versionData, modLoaderData, authUser, remote.app.getVersion())
 
-            // const SERVER_JOINED_REGEX = /\[.+\]: \[CHAT\] [a-zA-Z0-9_]{1,16} joined the game/
             const SERVER_JOINED_REGEX = new RegExp(`\\[.+\\]: \\[CHAT\\] ${authUser.displayName} joined the game`)
 
             const onLoadComplete = () => {
@@ -849,10 +899,6 @@ async function dlAsync(login = true) {
             }
             const start = Date.now()
 
-            // Attach a temporary listener to the client output.
-            // Will wait for a certain bit of text meaning that
-            // the client application has started, and we can hide
-            // the progress bar stuff.
             const tempListener = function(data){
                 if(GAME_LAUNCH_REGEX.test(data.trim())){
                     const diff = Date.now()-start
@@ -864,7 +910,6 @@ async function dlAsync(login = true) {
                 }
             }
 
-            // Listener for Discord RPC.
             const gameStateChange = function(data){
                 data = data.trim()
                 if(SERVER_JOINED_REGEX.test(data)){
@@ -891,7 +936,6 @@ async function dlAsync(login = true) {
                 // Build Minecraft process.
                 proc = pb.build()
                 
-                // Guardar referencia al servidor actual e iniciar seguimiento del tiempo de juego
                 currentServer = serv.rawServer.id
                 gameStartTime = Date.now()
 
@@ -902,32 +946,19 @@ async function dlAsync(login = true) {
                 setLaunchDetails(Lang.queryJS('landing.dlAsync.doneEnjoyServer'))
 
                 // Init Discord Hook
+                loggerLaunchSuite.info('=== VERIFICANDO DISCORD RPC ===')
+                loggerLaunchSuite.info('distro.rawDistribution.discord:', distro.rawDistribution.discord)
+                loggerLaunchSuite.info('serv.rawServer.discord:', serv.rawServer.discord)
+                
                 if(distro.rawDistribution.discord != null && serv.rawServer.discord != null){
+                    loggerLaunchSuite.info('INICIANDO Discord RPC...')
                     DiscordWrapper.initRPC(distro.rawDistribution.discord, serv.rawServer.discord)
                     hasRPC = true
                     proc.on('close', (code, signal) => {
-                    loggerLaunchSuite.info('Shutting down Discord Rich Presence..')
-                    DiscordWrapper.shutdownRPC()
-                    hasRPC = false
-                    
-                    // Calcular y guardar tiempo de juego cuando se cierra el proceso
-                    if(gameStartTime != null && currentServer != null) {
-                        const now = Date.now()
-                        const playedMinutes = Math.floor((now - gameStartTime) / 60000) // Convertir ms a minutos
-                        loggerLaunchSuite.info(`Añadiendo ${playedMinutes} minutos de tiempo de juego a ${currentServer}`)
-                        ConfigManager.addPlayTime(currentServer, playedMinutes)
-                        ConfigManager.save()
-                        gameStartTime = null
-                        currentServer = null
-                    }
-                    
-                    // Limpiar referencia del proceso
-                    proc = null
-                    loggerLaunchSuite.info('Proceso de Minecraft terminado, referencia limpiada')
-                })
-                } else {
-                    // Si no hay Discord RPC, todavía necesitamos rastrear el tiempo de juego
-                    proc.on('close', (code, signal) => {
+                        loggerLaunchSuite.info('Shutting down Discord Rich Presence..')
+                        DiscordWrapper.shutdownRPC()
+                        hasRPC = false
+                        
                         // Calcular y guardar tiempo de juego cuando se cierra el proceso
                         if(gameStartTime != null && currentServer != null) {
                             const now = Date.now()
@@ -939,10 +970,64 @@ async function dlAsync(login = true) {
                             currentServer = null
                         }
                         
-                        // Limpiar referencia del proceso
                         proc = null
                         loggerLaunchSuite.info('Proceso de Minecraft terminado, referencia limpiada')
                     })
+                } else {
+                    loggerLaunchSuite.warn('=== DISCORD RPC NO INICIADO ===')
+                    loggerLaunchSuite.warn('Razón: distro.discord o server.discord es null')
+                    
+                    loggerLaunchSuite.info('Probando con configuración hardcodeada...')
+                    const tempDiscordConfig = {
+                        clientId: "TU_CLIENT_ID_AQUI",
+                        smallImageText: "Kindly Klan",
+                        smallImageKey: "kindly-logo"
+                    }
+                    const tempServerConfig = {
+                        shortId: "KK",
+                        largeImageText: "Jugando en Kindly Klan",
+                        largeImageKey: "server-kindly"
+                    }
+                    
+                    try {
+                        DiscordWrapper.initRPC(tempDiscordConfig, tempServerConfig)
+                        hasRPC = true
+                        loggerLaunchSuite.info('Discord RPC iniciado con configuración temporal')
+                        proc.on('close', (code, signal) => {
+                            loggerLaunchSuite.info('Shutting down Discord Rich Presence..')
+                            DiscordWrapper.shutdownRPC()
+                            hasRPC = false
+                            
+                            if(gameStartTime != null && currentServer != null) {
+                                const now = Date.now()
+                                const playedMinutes = Math.floor((now - gameStartTime) / 60000)
+                                loggerLaunchSuite.info(`Añadiendo ${playedMinutes} minutos de tiempo de juego a ${currentServer}`)
+                                ConfigManager.addPlayTime(currentServer, playedMinutes)
+                                ConfigManager.save()
+                                gameStartTime = null
+                                currentServer = null
+                            }
+                            
+                            proc = null
+                            loggerLaunchSuite.info('Proceso de Minecraft terminado, referencia limpiada')
+                        })
+                    } catch (err) {
+                        loggerLaunchSuite.error('Error al iniciar Discord RPC temporal:', err)
+                        proc.on('close', (code, signal) => {
+                            if(gameStartTime != null && currentServer != null) {
+                                const now = Date.now()
+                                const playedMinutes = Math.floor((now - gameStartTime) / 60000)
+                                loggerLaunchSuite.info(`Añadiendo ${playedMinutes} minutos de tiempo de juego a ${currentServer}`)
+                                ConfigManager.addPlayTime(currentServer, playedMinutes)
+                                ConfigManager.save()
+                                gameStartTime = null
+                                currentServer = null
+                            }
+                            
+                            proc = null
+                            loggerLaunchSuite.info('Proceso de Minecraft terminado, referencia limpiada')
+                        })
+                    }
                 }
             } catch(err) {
 
@@ -1003,8 +1088,6 @@ function slide_(up){
         lCLRight.style.top = '-200vh'
         newsBtn.style.top = '130vh'
         newsContainer.style.top = '0px'
-        //date.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric'})
-        //landingContainer.style.background = 'rgba(29, 29, 29, 0.55)'
         landingContainer.style.background = 'rgba(0, 0, 0, 0.50)'
         setTimeout(() => {
             if(newsGlideCount === 1){

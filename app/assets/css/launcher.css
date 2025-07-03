@@ -3220,15 +3220,14 @@ input:checked + .toggleSwitchSlider:before {
 /* Settings icon colors. */
 #settingsSVG {
     stroke: #ffffff;
-    height: px;
+    height: 12px;
     transition: 0.25s ease;
 }
 .mediaButton:hover #settingsSVG,
 .mediaButton:focus #settingsSVG,
 .mediaButton:active #settingsSVG {
     stroke: #956afa;
-    transform: scale(10);
-    transform: rotate(90deg);
+    transform: rotate(90deg) scale(1.6);
 }
 
 /* Settings tooltip styles. */
@@ -4220,7 +4219,7 @@ input:checked + .toggleSwitchSlider:before {
     clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
     transform: translate(0.04em, 0.03em);
     opacity: 0.75;
-}
+  }
   
 /* Animación de rotación cyberpunk */
 @keyframes logoSpin {
@@ -4231,7 +4230,7 @@ input:checked + .toggleSwitchSlider:before {
     25% {
         transform: rotate(90deg) scale(1.05);
         filter: drop-shadow(0 0 20px rgba(255, 0, 255, 0.5));
-    }
+  }
     50% {
         transform: rotate(180deg) scale(1);
         filter: drop-shadow(0 0 25px rgba(255, 255, 0, 0.4));
@@ -4331,7 +4330,7 @@ input:checked + .toggleSwitchSlider:before {
         transform: translate(-50%, -50%) scale(1.2);
         opacity: 0.4;
     }
-}
+  }
 
 .loader {
     color: rgb(124, 124, 124);

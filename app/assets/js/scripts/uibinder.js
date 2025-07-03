@@ -68,23 +68,26 @@ async function showMainUI(data){
     updateSelectedServer(data.getServerById(ConfigManager.getSelectedServer()))
     refreshServerStatus()
 
-    // Comprobación remota de Java al iniciar
-    try {
-        await checkAndApplyRemoteJavaConfig(false)
-    } catch (err) {
-        console.warn('Error al aplicar config Java remoto:', err)
-    }
-
-    // Inicializar proxy TCP
-    try {
-        const { proxyInstance } = require('./assets/js/tcpproxy')
-        const configOk = await proxyInstance.fetchProxyConfig()
-        if (configOk) {
-            await proxyInstance.startProxy()
+    // Inicializar configuraciones remotas en segundo plano (sin bloquear UI)
+    setTimeout(async () => {
+        // Comprobación remota de Java en segundo plano
+        try {
+            await checkAndApplyRemoteJavaConfig(false)
+        } catch (err) {
+            console.warn('Error al aplicar config Java remoto:', err)
         }
-    } catch (err) {
-        console.warn('Error al inicializar proxy TCP:', err)
-    }
+
+        // Inicializar proxy TCP en segundo plano
+        try {
+            const { proxyInstance } = require('./assets/js/tcpproxy')
+            const configOk = await proxyInstance.fetchProxyConfig()
+            if (configOk) {
+                await proxyInstance.startProxy()
+            }
+        } catch (err) {
+            console.warn('Error al inicializar proxy TCP:', err)
+        }
+    }, 100) // Ejecutar después de que el UI esté cargado
 
     setTimeout(() => {
         document.getElementById('frameBar').style.backgroundColor = 'rgba(0, 0, 0, 0.5)'
@@ -333,7 +336,7 @@ async function validateSelectedAccount(){
         let val = false
         try {
             val = await AuthManager.validateSelected()
-            if(!val){
+        if(!val){
                 console.log(`[AuthValidation] Cuenta inválida para ${selectedAcc.displayName}`)
                 ConfigManager.removeAuthAccount(selectedAcc.uuid)
                 ConfigManager.save()
@@ -421,7 +424,7 @@ async function validateSelectedAccount(){
                 $('#waitingContainer').hide()
                 $('#overlayContainer').hide()
                 if(accLen === 0){
-                    switchView(getCurrentView(), VIEWS.loginOptions)
+                switchView(getCurrentView(), VIEWS.loginOptions)
                 } else {
                     switchView(getCurrentView(), VIEWS.landing)
                 }

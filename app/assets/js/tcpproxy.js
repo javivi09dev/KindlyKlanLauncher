@@ -42,7 +42,6 @@ class MinecraftTCPProxy {
                     targetPort: remoteConfig.targetPort || 25565,
                     retryAttempts: remoteConfig.retryAttempts || 3
                 }
-                logger.info('Configuración del proxy actualizada:', this.config)
                 return true
             } else {
                 logger.info('Proxy deshabilitado en configuración remota')
