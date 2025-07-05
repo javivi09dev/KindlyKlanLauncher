@@ -241,10 +241,17 @@ let selectedSettingsTab = 'settingsTabAccount'
  * @param {UIEvent} e The scroll event.
  */
 function settingsTabScrollListener(e){
-    if(e.target.scrollTop > Number.parseFloat(getComputedStyle(e.target.firstElementChild).marginTop)){
-        document.getElementById('settingsContainer').setAttribute('scrolled', '')
+    const container = document.getElementById('settingsContainer')
+    const tab = e.target
+    // Solo activar si el contenido es más alto que el contenedor
+    if(tab.scrollHeight > tab.clientHeight) {
+        if(tab.scrollTop > Number.parseFloat(getComputedStyle(tab.firstElementChild).marginTop)){
+            container.setAttribute('scrolled', '')
+        } else {
+            container.removeAttribute('scrolled')
+        }
     } else {
-        document.getElementById('settingsContainer').removeAttribute('scrolled')
+        container.removeAttribute('scrolled')
     }
 }
 
@@ -332,7 +339,7 @@ function fullSettingsSave() {
 /* Closes the settings view and saves all data. */
 settingsNavDone.onclick = () => {
     fullSettingsSave()
-    switchView(getCurrentView(), VIEWS.landing)
+    switchView(getCurrentView(), VIEWS.landing, 300, 500)
 }
 
 /**
@@ -1243,43 +1250,25 @@ function calculateRangeSliderMeta(v){
  */
 function bindRangeSlider(){
     Array.from(document.getElementsByClassName('rangeSlider')).map((v) => {
-
-        // Reference the track (thumb).
         const track = v.getElementsByClassName('rangeSliderTrack')[0]
-
-        // Set the initial slider value.
         const value = v.getAttribute('value')
         const sliderMeta = calculateRangeSliderMeta(v)
-
         updateRangedSlider(v, value, ((value-sliderMeta.min)/sliderMeta.step)*sliderMeta.inc)
-
-        // The magic happens when we click on the track.
         track.onmousedown = (e) => {
-
-            // Stop moving the track on mouse up.
             document.onmouseup = (e) => {
                 document.onmousemove = null
                 document.onmouseup = null
             }
-
-            // Move slider according to the mouse position.
             document.onmousemove = (e) => {
-
-                // Distance from the beginning of the bar in pixels.
-                const diff = e.pageX - v.offsetLeft - track.offsetWidth/2
-                
-                // Don't move the track off the bar.
-                if(diff >= 0 && diff <= v.offsetWidth-track.offsetWidth/2){
-
-                    // Convert the difference to a percentage.
-                    const perc = (diff/v.offsetWidth)*100
-                    // Calculate the percentage of the closest notch.
-                    const notch = Number(perc/sliderMeta.inc).toFixed(0)*sliderMeta.inc
-
-                    // If we're close to that notch, stick to it.
-                    if(Math.abs(perc-notch) < sliderMeta.inc/2){
-                        updateRangedSlider(v, sliderMeta.min+(sliderMeta.step*(notch/sliderMeta.inc)), notch)
-                    }
+                const rect = v.getBoundingClientRect()
+                const diff = e.clientX - rect.left
+                const usableWidth = v.offsetWidth - track.offsetWidth
+                let perc = ((diff - track.offsetWidth/2) / usableWidth) * 100
+                if(perc < 0) perc = 0
+                if(perc > 100) perc = 100
+                const notch = Number(perc/sliderMeta.inc).toFixed(0)*sliderMeta.inc
+                if(Math.abs(perc-notch) < sliderMeta.inc/2){
+                    updateRangedSlider(v, sliderMeta.min+(sliderMeta.step*(notch/sliderMeta.inc)), notch)
                 }
             }
         }

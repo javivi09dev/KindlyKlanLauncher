@@ -175,7 +175,7 @@ async function updateLaunchButtonWhitelist(authUser) {
             if(acc) {
                 if(acc.type === 'microsoft') {
                     await AuthManager.removeMicrosoftAccount(acc.uuid)
-                } else {
+    } else {
                     await AuthManager.removeMojangAccount(acc.uuid)
                 }
             }
@@ -623,19 +623,19 @@ async function downloadJava(effectiveJavaOptions, launchAfter = true) {
         
     } catch (err) {
         loggerLanding.error('Java download failed with enhanced manager, trying fallback:', err.message)
-        
-        let received = 0
-        await downloadFile(asset.url, asset.path, ({ transferred }) => {
-            received = transferred
-            setDownloadPercentage(Math.trunc((transferred/asset.size)*100))
-        })
-        setDownloadPercentage(100)
 
-        if(received != asset.size) {
-            loggerLanding.warn(`Java Download: Expected ${asset.size} bytes but received ${received}`)
-            if(!await validateLocalFile(asset.path, asset.algo, asset.hash)) {
+    let received = 0
+    await downloadFile(asset.url, asset.path, ({ transferred }) => {
+        received = transferred
+        setDownloadPercentage(Math.trunc((transferred/asset.size)*100))
+    })
+    setDownloadPercentage(100)
+
+    if(received != asset.size) {
+        loggerLanding.warn(`Java Download: Expected ${asset.size} bytes but received ${received}`)
+        if(!await validateLocalFile(asset.path, asset.algo, asset.hash)) {
                 loggerLanding.error(`Hashes do not match, ${asset.id} may be corrupted.`)
-                throw new Error(Lang.queryJS('landing.downloadJava.javaDownloadCorruptedError'))
+            throw new Error(Lang.queryJS('landing.downloadJava.javaDownloadCorruptedError'))
             }
         }
     }
@@ -772,7 +772,7 @@ async function dlAsync(login = true) {
         if (err.message === 'Validation timeout') {
             showLaunchFailure('Validación demorada', 'La validación de archivos está tomando demasiado tiempo. Inténtalo de nuevo o contacta soporte.')
         } else {
-            showLaunchFailure(Lang.queryJS('landing.dlAsync.errorDuringFileVerificationTitle'), err.displayable || Lang.queryJS('landing.dlAsync.seeConsoleForDetails'))
+        showLaunchFailure(Lang.queryJS('landing.dlAsync.errorDuringFileVerificationTitle'), err.displayable || Lang.queryJS('landing.dlAsync.seeConsoleForDetails'))
         }
         return
     }
@@ -993,22 +993,22 @@ async function dlAsync(login = true) {
                         DiscordWrapper.initRPC(tempDiscordConfig, tempServerConfig)
                         hasRPC = true
                         loggerLaunchSuite.info('Discord RPC iniciado con configuración temporal')
-                        proc.on('close', (code, signal) => {
+                    proc.on('close', (code, signal) => {
                             loggerLaunchSuite.info('Shutting down Discord Rich Presence..')
                             DiscordWrapper.shutdownRPC()
                             hasRPC = false
                             
-                            if(gameStartTime != null && currentServer != null) {
-                                const now = Date.now()
+                        if(gameStartTime != null && currentServer != null) {
+                            const now = Date.now()
                                 const playedMinutes = Math.floor((now - gameStartTime) / 60000)
-                                loggerLaunchSuite.info(`Añadiendo ${playedMinutes} minutos de tiempo de juego a ${currentServer}`)
-                                ConfigManager.addPlayTime(currentServer, playedMinutes)
-                                ConfigManager.save()
-                                gameStartTime = null
-                                currentServer = null
-                            }
-                            
-                            proc = null
+                            loggerLaunchSuite.info(`Añadiendo ${playedMinutes} minutos de tiempo de juego a ${currentServer}`)
+                            ConfigManager.addPlayTime(currentServer, playedMinutes)
+                            ConfigManager.save()
+                            gameStartTime = null
+                            currentServer = null
+                        }
+                        
+                        proc = null
                             loggerLaunchSuite.info('Proceso de Minecraft terminado, referencia limpiada')
                         })
                     } catch (err) {
@@ -1034,15 +1034,15 @@ async function dlAsync(login = true) {
                 loggerLaunchSuite.error('Error during launch', err)
                 showLaunchFailure(Lang.queryJS('landing.dlAsync.errorDuringLaunchTitle'), Lang.queryJS('landing.dlAsync.checkConsoleForDetails'))
 
-            }
+        }
 
-        } catch (error) {
-            loggerLaunchSuite.error('Error during whitelist verification:', error)
-            showLaunchFailure(
-                Lang.queryJS('landing.whitelist.verificationError') || 'Error al verificar la whitelist',
-                Lang.queryJS('landing.whitelist.contactAdmin') || 'Contacta al administrador para más detalles.'
-            )
-            return
+    } catch (error) {
+        loggerLaunchSuite.error('Error during whitelist verification:', error)
+        showLaunchFailure(
+            Lang.queryJS('landing.whitelist.verificationError') || 'Error al verificar la whitelist',
+            Lang.queryJS('landing.whitelist.contactAdmin') || 'Contacta al administrador para más detalles.'
+        )
+        return
         }
     }
 }

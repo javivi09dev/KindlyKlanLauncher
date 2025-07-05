@@ -35,7 +35,7 @@ loginPasswordDisclaimer1 = "Tu contraseña se envía directamente a Mojang y nun
 loginPasswordDisclaimer2 = "Kindly Klan no está afiliado a Mojang AB."
 
 [ejs.loginOptions]
-loginOptionsTitle = "Opciones de Inicio de Sesión"
+loginOptionsTitle = "Inicio de Sesión"
 loginWithMicrosoft = "Iniciar con Microsoft"
 loginWithMojang = "Iniciar con Mojang"
 cancelButton = "Cancelar"
@@ -296,7 +296,7 @@ loginButton = "Iniciar Sesión"
 selectAnotherAccountButton = "Seleccionar otra Cuenta"
 
 [js.uicore.autoUpdate]
-checkingForUpdateButton = "Buscando Actualizaciones... (Instalando)"
+checkingForUpdateButton = "Buscando Actualizaciones...)"
 installNowButton = "Instalar Ahora"
 checkForUpdatesButton = "Buscar Actualización"
 

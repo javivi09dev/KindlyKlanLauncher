@@ -125,12 +125,17 @@ function loginDisabled(v){
  * @param {boolean} v True to enable, false to disable.
  */
 function loginLoading(v){
+    const loginButtonText = loginButton.querySelector('.loginButtonText')
     if(v){
         loginButton.setAttribute('loading', v)
-        loginButton.innerHTML = loginButton.innerHTML.replace(Lang.queryJS('login.login'), Lang.queryJS('login.loggingIn'))
+        if(loginButtonText) {
+            loginButtonText.textContent = Lang.queryJS('login.loggingIn')
+        }
     } else {
         loginButton.removeAttribute('loading')
-        loginButton.innerHTML = loginButton.innerHTML.replace(Lang.queryJS('login.loggingIn'), Lang.queryJS('login.login'))
+        if(loginButtonText) {
+            loginButtonText.textContent = Lang.queryJS('login.login')
+        }
     }
 }
 
@@ -211,8 +216,8 @@ loginButton.addEventListener('click', () => {
             // Reset UI de login
             loginLoading(false)
             formDisabled(false)
-            loginUsername.value = ''
-            loginPassword.value = ''
+                loginUsername.value = ''
+                loginPassword.value = ''
         }, 500)
     })
     .catch((displayableError) => {

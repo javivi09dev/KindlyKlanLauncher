@@ -370,18 +370,11 @@ body, button {
 
 /*******************************************************************************
  *                                                                             *
- * Login View (login.ejs)                                                      *
+ * Login View (login.ejs) - Nuevo diseño moderno                               *
  *                                                                             *
  ******************************************************************************/
 
-/* Styles for dimmer login span. */
-.loginSpanDim {
-    font-size: 12px;
-    color: #848484;
-    font-weight: bold;
-}
-
-/* Main login container. */
+/* Main login container con efectos de fondo */
 #loginContainer {
     position: relative;
     display: flex;
@@ -389,366 +382,634 @@ body, button {
     align-items: center;
     height: 100%;
     width: 100%;
-    transition: filter 0.25s ease;
-    background: rgba(0, 0, 0, 0.50);
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.6) 100%);
 }
 
-/* Login cancel button styles. */
+/* Fondo con efectos visuales */
+#loginBackground {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Efecto de brillo de fondo */
+.loginGlowEffect {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 800px;
+    height: 800px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(
+        circle,
+        rgba(0, 255, 255, 0.03) 0%,
+        rgba(255, 0, 255, 0.02) 30%,
+        rgba(0, 255, 255, 0.01) 60%,
+        transparent 100%
+    );
+    animation: pulseGlow 4s ease-in-out infinite alternate;
+}
+
+@keyframes pulseGlow {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+    100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.6; }
+}
+
+/* Partículas flotantes */
+.loginParticles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.particle {
+    position: absolute;
+    background: rgba(0, 255, 255, 0.4);
+    border-radius: 50%;
+    animation: float 8s infinite linear;
+}
+
+.particle:nth-child(1) {
+    width: 3px;
+    height: 3px;
+    left: 20%;
+    animation-delay: 0s;
+    animation-duration: 6s;
+}
+
+.particle:nth-child(2) {
+    width: 2px;
+    height: 2px;
+    left: 40%;
+    animation-delay: 2s;
+    animation-duration: 8s;
+}
+
+.particle:nth-child(3) {
+    width: 4px;
+    height: 4px;
+    left: 60%;
+    animation-delay: 4s;
+    animation-duration: 7s;
+}
+
+.particle:nth-child(4) {
+    width: 2px;
+    height: 2px;
+    left: 80%;
+    animation-delay: 1s;
+    animation-duration: 9s;
+}
+
+.particle:nth-child(5) {
+    width: 3px;
+    height: 3px;
+    left: 10%;
+    animation-delay: 3s;
+    animation-duration: 6s;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+}
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-10vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Botón de cancelar moderno */
 #loginCancelContainer {
     position: absolute;
-    top: 5%;
-    right: 5%;
+    top: 30px;
+    right: 30px;
+    z-index: 100;
 }
 
-/* Login cancel button styles. */
 #loginCancelButton {
-    background: none;
-    border: none;
-    outline: none;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
+    color: white;
     cursor: pointer;
-    transition: 0.25s ease;
-}
-#loginCancelButton:hover #loginCancelIcon,
-#loginCancelButton:hover #loginCancelText,
-#loginCancelButton:focus #loginCancelIcon,
-#loginCancelButton:focus #loginCancelText {
-    text-shadow: 0px 0px 20px white;
-}
-#loginCancelButton:hover #loginCancelIcon,
-#loginCancelButton:focus #loginCancelIcon {
-    box-shadow: 0px 0px 20px white;
-}
-#loginCancelButton:active #loginCancelIcon,
-#loginCancelButton:active #loginCancelText {
-    text-shadow: 0px 0px 20px rgba(255, 255, 255, 0.75);
-    color: rgba(255, 255, 255, 0.75);
-    border-color: rgba(255, 255, 255, 0.75);
-}
-#loginCancelButton:active #loginCancelIcon {
-    box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.75);
-}
-#loginCancelButton:disabled {
-    pointer-events: none;
-}
-#loginCancelButton:disabled #loginCancelIcon,
-#loginCancelButton:disabled #loginCancelText {
-    color: rgba(255, 255, 255, 0.75);
-    border-color: rgba(255, 255, 255, 0.75);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    transition: all 0.3s ease;
+    outline: none;
 }
 
-/* The X in a circle icon for the cancel button. */
+#loginCancelButton:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
 #loginCancelIcon {
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    border: 1px solid white;
-    box-sizing: border-box;
-    height: 30px;
-    width: 30px;
-    font-size: 19px;
-    line-height: 30px;
-    margin: 0 auto;
-    margin-bottom: 5px;
-    transition: 0.25s ease;
-}
-/* Text for the login cancel button. */
-#loginCancelText {
-    font-size: 15px;
-    transition: 0.25s ease;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
 }
 
-/* Login content wrapper. */
+#loginCancelText {
+    font-size: 12px;
+    font-weight: 500;
+    font-family: 'Avenir Medium';
+}
+
+/* Contenido principal del login */
 #loginContent {
+    position: relative;
+    z-index: 10;
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 100%;
     height: 100%;
-    padding: 0px 25px;
 }
 
-/* Login form. */
+/* Tarjeta principal con glassmorphism suave */
+#loginCard {
+    position: relative;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 40px;
+    width: 420px;
+    max-width: 90vw;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    animation: slideInUp 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    overflow: hidden;
+}
+
+#loginCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    border-radius: 20px;
+    z-index: -1;
+    opacity: 0;
+    animation: glassEffect 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s forwards;
+}
+
+@keyframes glassEffect {
+    0% {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+    }
+    100% {
+        opacity: 1;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+}
+
+@keyframes slideInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+}
+}
+
+/* Header del login */
+#loginHeader {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+#loginLogoContainer {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+#loginImageSeal {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid rgba(0, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.3);
+    box-shadow: 
+        0 0 30px rgba(0, 255, 255, 0.3),
+        inset 0 0 20px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.logoGlow {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    background: radial-gradient(
+        circle,
+        rgba(0, 255, 255, 0.2) 0%,
+        rgba(255, 0, 255, 0.1) 50%,
+        transparent 100%
+    );
+    border-radius: 50%;
+    animation: logoGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes logoGlow {
+    0% { opacity: 0.5; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.1); }
+}
+
+#loginTitle {
+    font-family: 'Avenir Medium';
+    font-size: 26px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    margin: 16px 0 8px 0;
+    text-shadow: 
+        0 0 15px rgba(255, 255, 255, 0.1),
+        0 0 30px rgba(0, 255, 255, 0.2);
+    letter-spacing: 2px;
+}
+
+#loginSubheader {
+    font-family: 'Avenir Medium';
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* Formulario */
 #loginForm {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    gap: 24px;
 }
 
-/* Login form anchor styles. */
-#loginForm a {
-    font-size: 12px;
-    color: #848484;
-    font-weight: bold;
-    text-decoration: none;
-    transition: 0.25s ease;
-}
-#loginForm a:hover,
-#loginForm a:focus {
-    color: #a2a2a2;
-    outline: none;
-}
-#loginForm a:active {
-    color: #8b8b8b;
-}
-
-/* Logo on login form. */
-#loginImageSeal {
-    border-radius: 50%;
-    border: 2px solid #cad7e1;
-    background: rgba(1, 2, 1, 0.5);
-    height: 125px;
-    width: 125px;
-    box-shadow: 0px 0px 10px 0px rgb(0, 0, 0);
-    margin-bottom: 20px;
-}
-
-/* Header on login view. */
-#loginSubheader {
-    font-family: 'Avenir Medium';
-    margin-bottom: 25px;
-    font-size: 12px;
-    letter-spacing: 1px;
-    font-weight: bold;
-}
-
-/* Container to organize login field elements. */
+/* Contenedores de campos */
 .loginFieldContainer {
     position: relative;
+}
+
+.inputWrapper {
+    position: relative;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
     align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 16px;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-/* SVG icons on the login view. */
+.inputWrapper:focus-within {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(0, 255, 255, 0.3);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.15);
+}
+
 .loginSVG {
-    fill: #fff;
-    height: 20px;
     width: 20px;
+    height: 20px;
+    fill: rgba(255, 255, 255, 0.6);
+    margin-right: 12px;
+    transition: all 0.3s ease;
 }
 
-/* Span which displays errors related to login field content. */
-.loginErrorSpan {
-    font-family: 'Avenir Medium';
-    font-weight: bold;
-    font-size: 8px;
-    color: #ff1b0c;
-    width: 100%;
-    text-align: right;
+.inputWrapper:focus-within .loginSVG {
+    fill: rgba(0, 255, 255, 0.8);
+}
+
+.loginField {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: white;
+    font-family: 'Avenir Book';
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.loginField::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.fieldUnderline {
     position: absolute;
-    top: 7px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, rgba(0, 255, 255, 0.6) 50%, transparent 100%);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.inputWrapper:focus-within .fieldUnderline {
+    transform: scaleX(1);
+}
+
+/* Errores */
+.loginErrorSpan {
+    position: absolute;
+    bottom: -20px;
+    right: 0;
+    font-family: 'Avenir Medium';
+    font-size: 10px;
+    color: #ff6b6b;
+    font-weight: bold;
     opacity: 0;
-    transition: 0.25s ease;
+    transition: all 0.3s ease;
+    transform: translateY(-5px);
 }
 
 .shake {
-    animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+    animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
 }
 
 @keyframes shake {
-    10%, 90% {
-        transform: translate3d(-1px, 0, 0);
-    }
-    
-    20%, 80% {
-        transform: translate3d(2px, 0, 0);
-    }
-  
-    30%, 50%, 70% {
-        transform: translate3d(-4px, 0, 0);
-    }
-  
-    40%, 60% {
-        transform: translate3d(4px, 0, 0);
-    }
+    10%, 90% { transform: translate3d(-2px, 0, 0); }
+    20%, 80% { transform: translate3d(4px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+    40%, 60% { transform: translate3d(6px, 0, 0); }
 }
 
-/* Login text input styles. */
-.loginField {
-    font-family: 'Avenir Book';
-    background: none;
-    border-width: 1.5px 0px 0px 0px;
-    border-style: solid;
-    width: 250px;
-    margin-bottom: 20px;
-    border-color: #fff;
-    color: rgba(255, 255, 255, 0.75);
-    font-weight: bold;
-    text-align: center;
-    box-sizing: border-box;
-    padding: 7.5px;
-    font-size: 10px;
-    letter-spacing: 1px;
-}
-.loginField:focus {
-    outline: none;
-}
-.loginField:disabled {
-    color: rgba(255, 255, 255, 0.50);
-}
-.loginField::-webkit-input-placeholder {
-    color: rgba(255, 255, 255, 0.75);
-    font-size: 10px;
-    letter-spacing: 1px;
-    text-align: center;
-    font-weight: bold;
-}
-.loginField:focus::-webkit-input-placeholder {
-    color: transparent;
-}
-
-/* Add spacing between password field and options bar. */
-#labelPassword {
-    margin-bottom: 13px;
-}
-
-/* Container which contains the forgot and remember options. */
+/* Opciones de login */
 #loginOptions {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+}
+
+#checkmarkContainer {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+}
+
+#checkmarkContainer input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.checkmark {
+    width: 20px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    margin-right: 8px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+#checkmarkContainer input:checked ~ .checkmark {
+    background: linear-gradient(45deg, #00ffff, #ff00ff);
+    border-color: rgba(0, 255, 255, 0.6);
+}
+
+#checkmarkContainer input:checked ~ .checkmark:after {
+    display: block;
+}
+
+#loginRememberText {
+    font-family: 'Avenir Book';
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+}
+
+.loginLink {
+    font-family: 'Avenir Book';
+    font-size: 12px;
+    color: rgba(0, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.loginLink:hover {
+    color: rgba(0, 255, 255, 1);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.loginLink:after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 1px;
+    bottom: -2px;
+    left: 50%;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.8), transparent);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.loginLink:hover:after {
     width: 100%;
 }
 
-/* Remember option text. */
-#loginRememberText {
-    padding-right: 10px;
-    transition: 0.25s ease;
-}
-
-/* Login button styles. */
+/* Botón de login moderno */
 #loginButton {
-    background: none;
+    position: relative;
+    background: linear-gradient(45deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.2));
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 12px;
+    color: white;
+    cursor: pointer;
+    font-family: 'Avenir Medium';
+    font-size: 14px;
     font-weight: bold;
     letter-spacing: 2px;
-    border: none;
-    padding: 15px 5px;
-    margin: 10px 0px;
-    cursor: pointer;
-    position: relative;
-    right: -20px;
-    transition: 0.5s ease;
-}
-#loginButton:disabled {
-    color: rgba(255, 255, 255, 0.75);
-    pointer-events: none;
-}
-#loginButton[loading] {
-    color: #fff;
-}
-#loginButton:hover,
-#loginButton:focus {
-    text-shadow: 0px 0px 20px #fff;
+    padding: 16px 24px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    overflow: hidden;
     outline: none;
 }
-#loginButton:active {
-    color: #c7c7c7;
-    text-shadow:  0px 0px 20px #c7c7c7;
+
+#loginButton:not(:disabled):hover {
+    background: linear-gradient(45deg, rgba(0, 255, 255, 0.3), rgba(255, 0, 255, 0.3));
+    border-color: rgba(0, 255, 255, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 255, 255, 0.2);
 }
-#loginSVG {
-    -webkit-transform: translate3d(0, 0, 0);
-    overflow: visible;
-    transform: rotate(90deg);
-    margin-left: 20px;
-    transition: 0.25s ease;
-    width: 20px;
-    height: 20px;
+
+#loginButton:not(:disabled):active {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(0, 255, 255, 0.2);
 }
-#loginButton:hover #loginSVG,
-#loginButton:focus #loginSVG {
-    -webkit-filter: drop-shadow(0px 0px 2px #fff);
+
+#loginButton:disabled {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.4);
+    cursor: not-allowed;
 }
-#loginButton:active #loginSVG .arrowLine {
-    stroke: #c7c7c7;
+
+.buttonGlow {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.6s ease;
 }
-#loginButton:active #loginSVG {
-    -webkit-filter: drop-shadow(0px 0px 2px #c7c7c7);
-}
-#loginButton:disabled #loginSVG .arrowLine {
-    stroke: rgba(255, 255, 255, 0.75);
+
+#loginButton:not(:disabled):hover .buttonGlow {
+    left: 100%;
 }
 
 #loginButtonContent {
     display: flex;
     align-items: center;
+    justify-content: center;
+    gap: 12px;
+    position: relative;
+    z-index: 2;
 }
 
-#loginButton .circle-loader,
+.loginButtonIcon {
+    display: flex;
+    align-items: center;
+}
+
+#loginSVG {
+    width: 16px;
+    height: 16px;
+    transform: rotate(90deg);
+    transition: all 0.3s ease;
+}
+
+#loginButton:not(:disabled):hover #loginSVG {
+    transform: rotate(90deg) scale(1.1);
+    filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.8));
+}
+
+/* Estados de carga */
+#loginButton[loading] .loginButtonText {
+    opacity: 0.7;
+}
+
 #loginButton[loading] #loginSVG {
     display: none;
 }
-#loginButton[loading] .circle-loader,
-#loginButton #loginSVG {
-    display: initial;
-}
 
+#loginButton[loading] .circle-loader {
+    display: block;
+}
 
 .circle-loader {
-    margin-left: 20px;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    border-left-color: #ffffff;
-    animation-name: loader-spin;
-    animation-duration: 1s;
-    animation-iteration-count: infinite;
-    animation-timing-function: linear;
-    position: relative;
-    display: inline-block;
-    vertical-align: top;
-    border-radius: 50%;
+    display: none;
     width: 16px;
     height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-left-color: #00ffff;
+    border-radius: 50%;
+    animation: loader-spin 1s linear infinite;
 }
-.load-complete {
-    animation: none;
-    border-color: #ffffff;
-    transition: border 500ms ease-out;
+
+@keyframes loader-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
+
 .checkmark {
     display: none;
 }
+
 .checkmark.draw:after {
-    animation-duration: 800ms;
-    animation-timing-function: ease;
-    animation-name: checkmark;
-    transform: scaleX(-1) rotate(135deg);
+    animation: checkmark 0.8s ease;
 }
-.checkmark:after {
-    opacity: 1;
-    height: 8px;
-    width: 4px;
-    transform-origin: left top;
-    border-right: 2px solid #ffffff;
-    border-top: 2px solid #ffffff;
-    content: '';
-    left: 2px;
-    top: 8px;
-    position: absolute;
-}
-@keyframes loader-spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
+
 @keyframes checkmark {
-    0% {
-        height: 0;
-        width: 0;
-        opacity: 1;
+    0% { height: 0; width: 0; opacity: 1; }
+    20% { height: 0; width: 4px; opacity: 1; }
+    40% { height: 8px; width: 4px; opacity: 1; }
+    100% { height: 8px; width: 4px; opacity: 1; }
+}
+
+/* Footer del login */
+#loginFooter {
+    text-align: center;
+    margin-top: 8px;
+}
+
+.loginDisclaimer {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
-    20% {
-        height: 0;
-        width: 4px;
-        opacity: 1;
+
+.loginDisclaimer p {
+    font-family: 'Avenir Book';
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.5);
+    line-height: 1.4;
+    margin: 4px 0;
     }
-    40% {
-        height: 8px;
-        width: 4px;
-        opacity: 1;
+
+/* Responsive */
+@media (max-width: 480px) {
+    #loginCard {
+        padding: 24px;
+        margin: 20px;
     }
-    100% {
-        height: 8px;
-        width: 4px;
-        opacity: 1;
+    
+    #loginTitle {
+        font-size: 24px;
     }
 }
 
@@ -885,59 +1146,71 @@ body, button {
  ******************************************************************************/
 
 #waitingContainer {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    width: 100%;
-    transition: filter 0.25s ease;
-    background: rgba(0, 0, 0, 0.50);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  background: rgba(0,0,0,0.0); /* Fondo transparente para mantener el diseño actual */
 }
 
 #waitingContent {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    width: 50%;
-    top: -10%;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+}
+
+.waitingSpinner {
+  width: 44.8px;
+  height: 44.8px;
+  color: #554cb5;
     position: relative;
+  background: radial-gradient(11.2px,currentColor 94%,#0000);
+  margin: 0 auto 24px auto;
 }
 
 .waitingSpinner:before {
-    transform: rotateX(60deg) rotateY(45deg) rotateZ(45deg);
-    animation: 750ms rotateBefore infinite linear reverse;
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(10.08px at bottom right,#0000 94%,currentColor) top    left,
+              radial-gradient(10.08px at bottom left ,#0000 94%,currentColor) top    right, 
+              radial-gradient(10.08px at top    right,#0000 94%,currentColor) bottom left,
+              radial-gradient(10.08px at top    left ,#0000 94%,currentColor) bottom right; 
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  background-size: 22.4px 22.4px;
+  background-repeat: no-repeat;
+  animation: waitingSpinner-loader 1.5s infinite cubic-bezier(0.3,1,0,1);
 }
-.waitingSpinner:after {
-    transform: rotateX(240deg) rotateY(45deg) rotateZ(45deg);
-    animation: 750ms rotateAfter infinite linear;
-}
-.waitingSpinner:before,
-.waitingSpinner:after {
-    box-sizing: border-box;
-    content: '';
-    display: block;
-    position: fixed;
-    top: calc(50% - 5em);
-    /* left: 50%; */
-    margin-top: -5em;
-    margin-left: -5em;
-    width: 10em;
-    height: 10em;
-    transform-style: preserve-3d;
-    transform-origin: 50%;
-    transform: rotateY(50%);
-    perspective-origin: 50% 50%;
-    perspective: 340px;
-    background-size: 10em 10em;
-    background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+Cjxzdmcgd2lkdGg9IjI2NnB4IiBoZWlnaHQ9IjI5N3B4IiB2aWV3Qm94PSIwIDAgMjY2IDI5NyIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4bWxuczpza2V0Y2g9Imh0dHA6Ly93d3cuYm9oZW1pYW5jb2RpbmcuY29tL3NrZXRjaC9ucyI+CiAgICA8dGl0bGU+c3Bpbm5lcjwvdGl0bGU+CiAgICA8ZGVzY3JpcHRpb24+Q3JlYXRlZCB3aXRoIFNrZXRjaCAoaHR0cDovL3d3dy5ib2hlbWlhbmNvZGluZy5jb20vc2tldGNoKTwvZGVzY3JpcHRpb24+CiAgICA8ZGVmcz48L2RlZnM+CiAgICA8ZyBpZD0iUGFnZS0xIiBzdHJva2U9Im5vbmUiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIiBza2V0Y2g6dHlwZT0iTVNQYWdlIj4KICAgICAgICA8cGF0aCBkPSJNMTcxLjUwNzgxMywzLjI1MDAwMDM4IEMyMjYuMjA4MTgzLDEyLjg1NzcxMTEgMjk3LjExMjcyMiw3MS40OTEyODIzIDI1MC44OTU1OTksMTA4LjQxMDE1NSBDMjE2LjU4MjAyNCwxMzUuODIwMzEgMTg2LjUyODQwNSw5Ny4wNjI0OTY0IDE1Ni44MDA3NzQsODUuNzczNDM0NiBDMTI3LjA3MzE0Myw3NC40ODQzNzIxIDc2Ljg4ODQ2MzIsODQuMjE2MTQ2MiA2MC4xMjg5MDY1LDEwOC40MTAxNTMgQy0xNS45ODA0Njg1LDIxOC4yODEyNDcgMTQ1LjI3NzM0NCwyOTYuNjY3OTY4IDE0NS4yNzczNDQsMjk2LjY2Nzk2OCBDMTQ1LjI3NzM0NCwyOTYuNjY3OTY4IC0yNS40NDkyMTg3LDI1Ny4yNDIxOTggMy4zOTg0Mzc1LDEwOC40MTAxNTUgQzE2LjMwNzA2NjEsNDEuODExNDE3NCA4NC43Mjc1ODI5LC0xMS45OTIyOTg1IDE3MS41MDc4MTMsMy4yNTAwMDAzOCBaIiBpZD0iUGF0aC0xIiBmaWxsPSIjZmZmZmZmIiBza2V0Y2g6dHlwZT0iTVNTaGFwZUdyb3VwIj48L3BhdGg+CiAgICA8L2c+Cjwvc3ZnPg==);
+
+@keyframes waitingSpinner-loader {
+  33% {
+    inset: -11.2px;
+    transform: rotate(0deg);
+  }
+  66% {
+    inset: -11.2px;
+    transform: rotate(90deg);
+  }
+  100% {
+    inset: 0;
+    transform: rotate(90deg);
+  }
 }
 
 #waitingTextContainer {
-    position: fixed;
-    top: 50%;
+  margin: 0;
+  padding: 0;
+  text-align: center;
 }
+
+/* Elimino los estilos antiguos del loader de .waitingSpinner:before y :after y sus keyframes */
 
 @keyframes rotateBefore {
     from {
@@ -959,7 +1232,7 @@ body, button {
 
 /*******************************************************************************
  *                                                                             *
- * Login Options View (loginOptions.ejs)                                       *
+ * Login Options View (loginOptions.ejs) - Diseño moderno                      *
  *                                                                             *
  ******************************************************************************/
 
@@ -970,80 +1243,183 @@ body, button {
     align-items: center;
     height: 100%;
     width: 100%;
-    transition: filter 0.25s ease;
-    background: rgba(0, 0, 0, 0.50);
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.6) 100%);
+}
+
+/* Aplicar los mismos efectos de fondo que en login */
+#loginOptionsContainer::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 800px;
+    height: 800px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(
+        circle,
+        rgba(0, 255, 255, 0.03) 0%,
+        rgba(255, 0, 255, 0.02) 30%,
+        rgba(0, 255, 255, 0.01) 60%,
+        transparent 100%
+    );
+    animation: pulseGlow 4s ease-in-out infinite alternate;
+    pointer-events: none;
 }
 
 #loginOptionsContent {
-    border-radius: 3px;
     position: relative;
-    top: -5%;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 40px;
+    width: 420px;
+    max-width: 90vw;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    animation: slideInUp 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    overflow: hidden;
+}
+
+#loginOptionsContent::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    z-index: -1;
+    opacity: 0;
+    animation: glassEffect 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s forwards;
 }
 
 .loginOptionsMainContent {
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 32px;
+}
+
+.loginOptionsMainContent h2 {
+    font-family: 'Avenir Book';
+    font-size: 20px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+    text-shadow: 
+        0 0 10px rgba(255, 255, 255, 0.1),
+        0 0 20px rgba(0, 255, 255, 0.15);
+    letter-spacing: 1px;
+    text-align: center;
+    text-transform: uppercase;
 }
 
 .loginOptionActions {
     display: flex;
     flex-direction: column;
-    row-gap: 10px;
+    gap: 16px;
+    width: 100%;
 }
 
 .loginOptionButtonContainer {
-    width: 16em;
+    width: 100%;
 }
 
 .loginOptionButton {
-    background: rgba(0, 0, 0, 0.25);
-    border: 1px solid rgba(126, 126, 126, 0.57);
-    border-radius: 3px;
-    height: 50px;
     width: 100%;
-    text-align: left;
-    padding: 0px 25px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.9);
     cursor: pointer;
-    outline: none;
-    transition: 0.25s ease;
     display: flex;
     align-items: center;
-    column-gap: 5px;
+    gap: 16px;
+    padding: 0 24px;
+    font-family: 'Avenir Book';
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    outline: none;
+    position: relative;
+    overflow: hidden;
 }
+
+.loginOptionButton::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    transition: left 0.6s ease;
+}
+
+.loginOptionButton:hover::before {
+    left: 100%;
+}
+
 .loginOptionButton:hover,
 .loginOptionButton:focus {
-    background: rgba(54, 54, 54, 0.25);
-    text-shadow: 0px 0px 20px white;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(0, 255, 255, 0.4);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.loginOptionButton:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(0, 255, 255, 0.2);
+}
+
+.loginOptionButton svg {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
 }
 
 #loginOptionCancelContainer {
-    position: absolute;
-    bottom: -100px;
+    margin-top: 16px;
 }
 
 #loginOptionCancelButton {
-    background: none;
-    border: none;
-    padding: 2px 0px;
-    font-size: 16px;
-    font-weight: bold;
-    color: lightgrey;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.7);
     cursor: pointer;
+    font-family: 'Avenir Book';
+    font-size: 12px;
+    font-weight: 500;
+    padding: 8px 16px;
+    transition: all 0.3s ease;
     outline: none;
-    transition: 0.25s ease;
 }
+
 #loginOptionCancelButton:hover,
 #loginOptionCancelButton:focus {
-    text-shadow: 0px 0px 20px lightgrey;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    transform: translateY(-1px);
 }
+
 #loginOptionCancelButton:active {
-    text-shadow: 0px 0px 20px rgba(211, 211, 211, 0.75);
-    color: rgba(211, 211, 211, 0.75);
+    transform: translateY(0);
 }
+
 #loginOptionCancelButton:disabled {
-    color: rgba(211, 211, 211, 0.75);
+    opacity: 0.5;
     pointer-events: none;
+    cursor: not-allowed;
 }
 
 
@@ -1058,19 +1434,39 @@ body, button {
     position: relative;
     height: 100%;
     display: flex;
-    background-color: rgba(0, 0, 0, 0.50);
-    transition: background-color 0.25s cubic-bezier(.02, .01, .47, 1);
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.45) 0%, rgba(15, 15, 25, 0.55) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: all 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+    animation: settingsContainerLoad 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+    opacity: 0;
+}
+
+@keyframes settingsContainerLoad {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 /* Drop shadow displayed when content is scrolled out of view. */
 #settingsContainer:before {
     content: '';
-    background: linear-gradient(rgba(0, 0, 0, 0.25), transparent);
+    background: linear-gradient(rgba(0, 0, 0, 0.4), transparent);
     width: 100%;
-    height: 5px;
+    height: 8px;
     position: absolute;
+    top: 0;
+    left: 0;
     opacity: 0;
-    transition: opacity 0.25s ease;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
 #settingsContainer[scrolled]:before {
     opacity: 1;
@@ -1121,73 +1517,83 @@ body, button {
 
 /* Navigation item shared styles. */
 .settingsNavItem {
-    --bezier: cubic-bezier(0.22, 0.61, 0.36, 1);
-    --edge-light: hsla(0, 0%, 30%, 0.8);
-    --text-light: rgba(255, 255, 255, 0.4);
-    --back-color: 220, 30%;
+    background: rgba(30, 30, 30, 0.35);
+    color: rgba(255,255,255,0.85);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    margin-bottom: 18px;
+    padding: 14px 24px;
+    font-family: 'Avenir Medium';
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
     cursor: pointer;
-    padding: 0.7em 1em;
-    border-radius: 0.5em;
-    min-height: 2.4em;
-    min-width: 3em;
+    transition: all 0.25s cubic-bezier(0.22, 0.61, 0.36, 1);
+    outline: none;
     display: flex;
     align-items: center;
-    gap: 0.7em;
-    font-size: 16px;
-    letter-spacing: 0.05em;
-    line-height: 1;
-    font-weight: bold;
-    background: linear-gradient(
-      140deg,
-      hsla(var(--back-color), 20%, 1) min(2em, 20%),
-      hsla(var(--back-color), 20%, 0.6) min(8em, 100%)
-    );
-    color: hsla(0, 0%, 80%);
-    border: 0;
-    box-shadow: inset 0.4px 1px 4px var(--edge-light);
-    margin-bottom: 18px;
-    margin-top: 0;
-    transition: all 0.1s var(--bezier);
+    gap: 10px;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    position: relative;
+    overflow: hidden;
 }
-.settingsNavItem:hover {
-    --edge-light: hsla(0, 0%, 40%, 1);
-    text-shadow: 0px 0px 10px var(--text-light);
-    box-shadow:
-      inset 0.4px 1px 4px var(--edge-light),
-      2px 4px 8px hsla(0, 0%, 0%, 0.5);
-    transform: scale(1.07);
+.settingsNavItem:hover, .settingsNavItem:focus {
+    background: rgba(60, 60, 60, 0.45);
     color: #fff;
+    border-color: rgba(255,255,255,0.15);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    transform: scale(1.03);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
 .settingsNavItem:active {
-    --text-light: rgba(255, 255, 255, 0.8);
-    background: linear-gradient(
-      140deg,
-      hsla(var(--back-color), 25%, 1) min(2em, 20%),
-      hsla(var(--back-color), 25%, 0.6) min(8em, 100%)
-    );
-    box-shadow:
-      inset 0.4px 1px 8px var(--edge-light),
-      0px 0px 8px hsla(var(--back-color), 30%, 0.6);
-    text-shadow: 0px 0px 20px var(--text-light);
-    color: hsla(0, 0%, 90%, 1);
-    letter-spacing: 0.1em;
+    background: rgba(10, 10, 10, 0.55);
+    color: #e0e0e0;
+    border-color: rgba(255,255,255,0.10);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     transform: scale(1);
 }
+.settingsNavItemSelected,
 .settingsNavItem[selected] {
-    background: linear-gradient(140deg, #2e5a8a 40%, #1e2a3a 100%);
-    color: #fff;
-    box-shadow: 0 0 0 2px #3fa7ff, 0 2px 8px #000a;
-    transform: scale(1.09);
-    z-index: 2;
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 
+        0 4px 20px rgba(0, 0, 0, 0.4),
+        0 0 15px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    font-weight: 700;
+    transform: scale(1.02);
+    position: relative;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
-.settingsNavItem .settingsNavIcon {
-    width: 1.5em;
-    height: 1.5em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 0.3em;
-    opacity: 0.85;
+
+.settingsNavItem[selected]::before {
+    content: '';
+    position: absolute;
+    left: -2px;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 50%, #ffffff 100%);
+    border-radius: 0 2px 2px 0;
+    opacity: 0.9;
+}
+@media (max-width: 900px) {
+    .settingsNavItem {
+        font-size: 15px;
+        padding: 12px 18px;
+        margin-bottom: 14px;
+    }
+}
+@media (max-width: 700px) {
+    .settingsNavItem {
+        font-size: 14px;
+        padding: 10px 12px;
+        margin-bottom: 10px;
+    }
 }
 
 /* Div to add some space between nav items. */
@@ -1216,16 +1622,16 @@ body, button {
 
 /* Settings done button styles. */
 #settingsNavDone {
-    background: linear-gradient(140deg, #2e5a8a 40%, #1e2a3a 100%);
+    background: rgba(255, 255, 255, 0.05);
     color: #fff;
     font-size: 1.1em;
     font-weight: bold;
-    border: none;
+    border: 1px solid rgba(255,255,255,0.12);
     border-radius: 0.5em;
     padding: 0.7em 2.2em;
-    box-shadow: 0 2px 8px #000a;
+    box-shadow: 0 2px 12px rgba(221, 212, 212, 0.25), 0 1px 0 rgba(255,255,255,0.05) inset;
     cursor: pointer;
-    transition: all 0.15s cubic-bezier(0.22, 0.61, 0.36, 1);
+    transition: all 0.25s cubic-bezier(0.22, 0.61, 0.36, 1);
     outline: none;
     margin: 0;
     min-width: 120px;
@@ -1233,34 +1639,34 @@ body, button {
     display: flex;
     align-items: center;
     justify-content: center;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
 }
 #settingsNavDone:hover, #settingsNavDone:focus {
-    background: linear-gradient(140deg, #3fa7ff 40%, #2e5a8a 100%);
+    background: rgba(30,30,30,0.85);
     color: #fff;
-    box-shadow: 0 4px 16px #3fa7ff99;
-    transform: scale(1.07);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.35), 0 0 10px rgba(255,255,255,0.08) inset;
+    border-color: rgba(255,255,255,0.18);
+    transform: scale(1.05);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
 #settingsNavDone:active {
-    background: linear-gradient(140deg, #1e2a3a 40%, #2e5a8a 100%);
+    background: rgba(0,0,0,0.92);
     color: #e0e0e0;
-    box-shadow: 0 2px 8px #000a;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    border-color: rgba(255,255,255,0.10);
     transform: scale(1);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
 }
 @media (max-width: 900px) {
-    #settingsNavContentBottom {
-        right: 2vw;
-        bottom: 2vw;
-}
     #settingsNavDone {
         font-size: 1em;
         padding: 0.7em 1.5em;
     }
 }
 @media (max-width: 700px) {
-    #settingsNavContentBottom {
-        right: 1vw;
-        bottom: 1vw;
-    }
     #settingsNavDone {
         font-size: 0.95em;
         padding: 0.7em 1.1em;
@@ -1272,8 +1678,26 @@ body, button {
     height: 100%;
     width: 75%;
     box-sizing: border-box;
-    /* Aumenta el espacio a la izquierda para separar del menú */
-    padding-left: 2vw;
+    padding: 2vh 3vw 2vh 2vw;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+#settingsContainerRight::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 5%;
+    bottom: 5%;
+    width: 1px;
+    background: linear-gradient(to bottom, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.1) 20%, 
+        rgba(255, 255, 255, 0.25) 50%, 
+        rgba(255, 255, 255, 0.1) 80%, 
+        transparent 100%);
+    opacity: 0.8;
 }
 
 /* Settings tab shared styles. */
@@ -1281,16 +1705,46 @@ body, button {
     width: 100%;
     height: 100%;
     overflow-y: auto;
+    padding: 0 8px;
+    animation: tabFadeIn 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+    opacity: 0;
 }
+
+@keyframes tabFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
 .settingsTab::-webkit-scrollbar {
-    width: 2px;
+    width: 6px;
 }
+
 .settingsTab::-webkit-scrollbar-track {
-    display: none;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
 }
+
 .settingsTab::-webkit-scrollbar-thumb {
-    border-radius: 10px;
-    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.50);
+    background: linear-gradient(180deg, 
+        rgba(255, 255, 255, 0.3) 0%, 
+        rgba(255, 255, 255, 0.15) 50%, 
+        rgba(255, 255, 255, 0.3) 100%);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.settingsTab::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, 
+        rgba(255, 255, 255, 0.4) 0%, 
+        rgba(255, 255, 255, 0.25) 50%, 
+        rgba(255, 255, 255, 0.4) 100%);
 }
 
 /* Add spacing to the top of each settings tab. */
@@ -1307,14 +1761,41 @@ body, button {
 .settingsTabHeader {
     display: flex;
     flex-direction: column;
-    margin-bottom: 20px;
+    margin-bottom: 32px;
+    padding: 24px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    position: relative;
+    animation: headerSlideIn 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+    opacity: 0;
 }
+
+@keyframes headerSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .settingsTabHeaderText {
-    font-size: 20px;
+    font-size: 28px;
     font-family: 'Avenir Medium';
+    color: #fff;
+    font-weight: 600;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
 }
+
 .settingsTabHeaderDesc {
-    font-size: 12px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.75);
+    font-family: 'Avenir Book';
+    line-height: 1.5;
+    letter-spacing: 0.3px;
 }
 
 /* Selected server content container */
@@ -1378,65 +1859,137 @@ body, button {
 /* Default styles for text/number inputs. */
 #settingsContainer input[type=number],
 #settingsContainer input[type=text] {
-    color: white;
-    background: rgba(0, 0, 0, 0.25);
-    border-radius: 3px;
-    border: 1px solid rgba(126, 126, 126, 0.57);
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
     font-family: 'Avenir Book';
-    transition: 0.25s ease;
+    padding: 12px 16px;
+    font-size: 14px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    min-width: 120px;
 }
+
 #settingsContainer input[type=number]:focus,
 #settingsContainer input[type=text]:focus {
     outline: none;
-    border-color: rgba(126, 126, 126, 0.87);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.35);
+    box-shadow: 
+        0 4px 20px rgba(0, 0, 0, 0.25),
+        0 0 15px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
 }
+
+#settingsContainer input[type=number]:hover:not(:focus),
+#settingsContainer input[type=text]:hover:not(:focus) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-0.5px);
+}
+
 #settingsContainer input[type=number][error] {
-    border-color: rgb(255, 27, 12);
-    background: rgba(236, 0, 0, 0.25);
-    color: rgb(255, 27, 12);
+    border-color: rgba(255, 27, 12, 0.6);
+    background: rgba(236, 0, 0, 0.15);
+    color: #ff6b6b;
+    box-shadow: 
+        0 4px 20px rgba(255, 27, 12, 0.2),
+        inset 0 1px 0 rgba(255, 27, 12, 0.1);
 }
 
 /* Styles for a generic settings entry. */
 .settingsFieldContainer {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
-    padding: 20px 0px;
-    width: 75%;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.50);
+    padding: 24px 0;
+    width: 100%;
+    max-width: 85%;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+    position: relative;
+    animation: fieldSlideIn 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+    opacity: 0;
+    gap: 24px;
 }
+
+@keyframes fieldSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.settingsFieldContainer:hover {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border-bottom-color: rgba(255, 255, 255, 0.15);
+    padding: 24px 16px;
+    margin: 0 -16px;
+}
+
 .settingsFieldLeft {
     display: flex;
     flex-direction: column;
+    flex: 1;
+    min-width: 0;
 }
+
 .settingsFieldTitle {
-    font-size: 14px;
+    font-size: 16px;
     font-family: 'Avenir Medium';
-    color: rgba(255, 255, 255, 0.95);
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
 }
+
 .settingsFieldDesc {
-    font-size: 12px;
-    color: rgba(255, 255, 255, .95);
-    margin-top: 5px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 0;
+    line-height: 1.4;
+    font-family: 'Avenir Book';
 }
+
 .settingsDivider {
     height: 1px;
-    width: 75%;
-    background: rgba(255, 255, 255, 0.25);
+    width: 100%;
+    max-width: 85%;
+    background: linear-gradient(to right,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 20%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0.1) 80%,
+        transparent 100%);
+    margin: 20px 0;
 }
 
 /* Toggle Switch */
 .toggleSwitch {
     position: relative;
     display: inline-block;
-    width: 40px;
-    height: 20px;
+    width: 52px;
+    height: 28px;
     border-radius: 50px;
     box-sizing: border-box;
+    flex-shrink: 0;
 }
+
 .toggleSwitch input {
-    display:none;
+    display: none;
 }
+
 .toggleSwitchSlider {
     position: absolute;
     cursor: pointer;
@@ -1444,58 +1997,104 @@ body, button {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(255, 255, 255, 0.35);
-    transition: .4s;
+    background: rgba(255, 255, 255, 0.15);
+    transition: all 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
     border-radius: 50px;
-    border: 1px solid rgba(126, 126, 126, 0.57);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
+
+.toggleSwitchSlider:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
 .toggleSwitchSlider:before {
     position: absolute;
     content: "";
-    height: 13px;
-    width: 16px;
+    height: 20px;
+    width: 20px;
     left: 3px;
     bottom: 3px;
-    background-color: white;
-    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.75);
+    background: linear-gradient(145deg, #ffffff 0%, #f0f0f0 100%);
+    box-shadow: 
+        0 3px 8px rgba(0, 0, 0, 0.3),
+        0 1px 2px rgba(0, 0, 0, 0.2);
     border-radius: 50px;
-    transition: .4s;
+    transition: all 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
+
 input:checked + .toggleSwitchSlider {
-    background-color: rgb(31, 140, 11);
-    /* box-shadow: inset 2px 1px 20px black; */
-    border: 1px solid rgb(31, 140, 11);
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.8) 0%, rgba(21, 128, 61, 0.9) 100%);
+    border: 1px solid rgba(34, 197, 94, 0.6);
+    box-shadow: 
+        0 4px 16px rgba(34, 197, 94, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
+
 input:checked + .toggleSwitchSlider:before {
-    transform: translateX(15px);
+    transform: translateX(22px);
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.4),
+        0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* Range Slider styles. */
 .rangeSlider {
-    width: 35%;
-    height: 5px;
-    margin: 15px 0px;
-    background: grey;
-    border-radius: 3px;
+    width: 50%;
+    min-width: 200px;
+    height: 8px;
+    margin: 20px 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
     position: relative;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
 }
+
 .rangeSliderBar {
     position: absolute;
-    background: #8be88b;
+    background: linear-gradient(90deg, rgba(34, 197, 94, 0.8) 0%, rgba(21, 128, 61, 0.9) 100%);
     width: 50%;
-    height: 5px;
-    border-radius: 3px 0px 0px 3px;
-    transition: background 0.25s ease;
+    height: 8px;
+    border-radius: 12px 0 0 12px;
+    transition: all 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
 }
+
 .rangeSliderTrack {
     position: absolute;
-    top: -7.5px;
-    width: 7px;
-    height: 20px;
-    background: white;
-    border-radius: 3px;
+    top: -10px;
+    width: 12px;
+    height: 28px;
+    background: linear-gradient(145deg, #ffffff 0%, #f0f0f0 100%);
+    border-radius: 8px;
     left: 50%;
     cursor: ew-resize;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.3),
+        0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s cubic-bezier(0.22, 0.61, 0.36, 1);
+    transform: translateX(-50%);
+}
+
+.rangeSliderTrack:hover {
+    background: linear-gradient(145deg, #ffffff 0%, #e8e8e8 100%);
+    transform: translateX(-50%) scale(1.1);
+    box-shadow: 
+        0 6px 16px rgba(0, 0, 0, 0.4),
+        0 3px 6px rgba(0, 0, 0, 0.3);
 }
 
 /* File selectors */
@@ -4752,31 +5351,199 @@ input:checked + .toggleSwitchSlider:before {
     margin-top: 2px;
 }
 
+/* Responsive design for medium screens (tablets) */
+@media (max-width: 1024px) {
+    #settingsContainerLeft {
+        width: 32%;
+        padding-right: 1.5vw;
+    }
+    #settingsContainerRight {
+        width: 68%;
+        padding: 2vh 2vw 2vh 1.5vw;
+    }
+    .settingsTabHeaderText {
+        font-size: 24px;
+    }
+    .settingsFieldContainer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    .settingsFieldLeft {
+        width: 100%;
+    }
+    .rangeSlider {
+        width: 70%;
+        min-width: 150px;
+    }
+}
+
+/* Responsive design for small tablets and large phones */
 @media (max-width: 900px) {
     #settingsContainerLeft {
         width: 35%;
-        padding-right: 3vw;
+        padding-right: 1vw;
     }
     #settingsContainerRight {
         width: 65%;
-        padding-left: 3vw;
+        padding: 2vh 1.5vw 2vh 1vw;
     }
     .settingsNavItem {
         font-size: 15px;
+        padding: 12px 18px;
         margin-bottom: 14px;
     }
+    .settingsTabHeaderText {
+        font-size: 22px;
+    }
+    .settingsTabHeaderDesc {
+        font-size: 13px;
+    }
+    .settingsFieldContainer {
+        padding: 20px 0;
+        max-width: 95%;
+    }
+    .settingsFieldTitle {
+        font-size: 15px;
+    }
+    .settingsFieldDesc {
+        font-size: 12px;
+    }
 }
+
+/* Responsive design for mobile phones */
 @media (max-width: 700px) {
+    #settingsContainer {
+        flex-direction: column;
+    }
     #settingsContainerLeft {
-        width: 45%;
-        padding-right: 4vw;
+        width: 100%;
+        height: auto;
+        padding: 2vh 3vw 1vh 3vw;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     }
     #settingsContainerRight {
-        width: 55%;
-        padding-left: 4vw;
+        width: 100%;
+        height: auto;
+        padding: 1vh 3vw 3vh 3vw;
+    }
+    #settingsContainerRight::before {
+        display: none;
+    }
+    #settingsNavItemsContainer {
+        height: auto;
+    }
+    #settingsNavItemsContent {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
     }
     .settingsNavItem {
         font-size: 14px;
-        margin-bottom: 10px;
+        padding: 10px 16px;
+        margin-bottom: 0;
+        flex: 0 1 auto;
+        min-width: 140px;
     }
+    .settingsTabHeaderText {
+        font-size: 20px;
+    }
+    .settingsTabHeaderDesc {
+        font-size: 12px;
+    }
+    .settingsFieldContainer {
+        max-width: 100%;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .rangeSlider {
+        width: 100%;
+        min-width: auto;
+    }
+    .toggleSwitch {
+        width: 48px;
+        height: 26px;
+    }
+    .toggleSwitchSlider:before {
+        height: 18px;
+        width: 18px;
+    }
+    input:checked + .toggleSwitchSlider:before {
+        transform: translateX(20px);
+    }
+}
+
+/* Extra responsive for very small screens */
+@media (max-width: 480px) {
+    #settingsContainer {
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(15, 15, 25, 0.7) 100%);
+    }
+    #settingsContainerLeft {
+        padding: 1.5vh 2vw 1vh 2vw;
+    }
+    #settingsContainerRight {
+        padding: 1vh 2vw 2vh 2vw;
+    }
+    .settingsNavItem {
+        font-size: 13px;
+        padding: 8px 12px;
+        min-width: 120px;
+    }
+    .settingsTabHeaderText {
+        font-size: 18px;
+    }
+    .settingsFieldContainer {
+        padding: 16px 0;
+    }
+    .settingsFieldTitle {
+        font-size: 14px;
+    }
+    .settingsFieldDesc {
+        font-size: 11px;
+    }
+    #settingsContainer input[type=number],
+    #settingsContainer input[type=text] {
+        padding: 10px 12px;
+        font-size: 13px;
+        min-width: 100px;
+    }
+}
+
+/* Progressive animation delays for smoother appearance */
+.settingsTabHeader {
+    animation-delay: 0.1s;
+}
+
+.settingsFieldContainer:nth-child(1) { animation-delay: 0.2s; }
+.settingsFieldContainer:nth-child(2) { animation-delay: 0.3s; }
+.settingsFieldContainer:nth-child(3) { animation-delay: 0.4s; }
+.settingsFieldContainer:nth-child(4) { animation-delay: 0.5s; }
+.settingsFieldContainer:nth-child(5) { animation-delay: 0.6s; }
+.settingsFieldContainer:nth-child(6) { animation-delay: 0.7s; }
+.settingsFieldContainer:nth-child(7) { animation-delay: 0.8s; }
+.settingsFieldContainer:nth-child(8) { animation-delay: 0.9s; }
+
+.settingsTab {
+    animation-delay: 0.2s;
+}
+
+/* Smooth transitions for all interactive elements */
+.settingsFieldContainer,
+.settingsTabHeader,
+.settingsNavItem,
+#settingsNavDone,
+input[type=number],
+input[type=text],
+.toggleSwitch,
+.rangeSlider {
+    transition: all 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.settingsTab, .settingsFieldContainer, .settingsTabHeader {
+    -webkit-backface-visibility: hidden;
+    -webkit-transform: translateZ(0) scale(1.0, 1.0);
+    transform: translateZ(0);
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
 }
