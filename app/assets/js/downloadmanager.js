@@ -7,7 +7,7 @@ const http = require('http')
 const logger = LoggerUtil.getLogger('DownloadManager')
 
 /**
- * Gestor de descargas con reintentos, timeouts y concurrencia
+ * Gestor de descargas :)
  */
 class EnhancedDownloadManager {
     constructor(options = {}) {
@@ -22,10 +22,6 @@ class EnhancedDownloadManager {
         this.downloadQueue = []
         this.activeDownloads = new Set()
     }
-
-    /**
-     * Descargar un archivo con reintentos y timeout
-     */
     async downloadWithRetry(url, path, onProgress, attempt = 1) {
         const maxAttempts = this.config.maxRetries + 1
         
@@ -178,7 +174,7 @@ class EnhancedDownloadManager {
     }
 
     /**
-     * Ping a una URL para medir latencia
+     * Ping a la url de kk
      */
     async pingUrl(url) {
         return new Promise((resolve, reject) => {

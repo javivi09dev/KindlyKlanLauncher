@@ -780,15 +780,62 @@ async function dlAsync(login = true) {
 
     if(invalidFileCount > 0) {
         loggerLaunchSuite.info(`Downloading ${invalidFileCount} files with enhanced manager.`)
-        setLaunchDetails(`${Lang.queryJS('landing.dlAsync.downloadingFiles')} (${invalidFileCount} archivos)`)
+        setLaunchDetails(`${Lang.queryJS('landing.dlAsync.downloadingFiles')}`)
         setLaunchPercentage(0)
         
         try {
+            let __kk_lastProgress = 0
+            let __kk_lastUpdate = Date.now()
+            const __kk_watchdogIntervalMs = 15000
+            const __kk_stuckThresholdMs = 5*60*1000 
+            let __kk_watchdogTimer = null
+
+            const __kk_startWatchdog = () => {
+                if(__kk_watchdogTimer != null) return
+                __kk_watchdogTimer = setInterval(() => {
+                    const now = Date.now()
+                    // Consideramos "bloqueo" si el progreso está muy alto y no cambia por mucho tiempo.
+                    if(__kk_lastProgress >= 98 && (now - __kk_lastUpdate) >= __kk_stuckThresholdMs){
+                        try {
+                            loggerLaunchSuite.warn(`Descarga aparentemente bloqueada en ${__kk_lastProgress}%. Reiniciando launcher...`)
+                            if(fullRepairModule && fullRepairModule.childProcess){
+                                try { fullRepairModule.childProcess.kill() } catch(e) {  }
+                            }
+                        } finally {
+                            clearInterval(__kk_watchdogTimer)
+                            __kk_watchdogTimer = null
+                        }
+                        try {
+                            showLaunchFailure('Descarga tardando demasiado', 'Ups! La descarga parece haberse bloqueado. El launcher se reiniciará automáticamente.')
+                        } catch(e){ }
+                        setTimeout(() => {
+                            try {
+                                remote.app.relaunch()
+                                remote.app.exit(0)
+                            } catch(e){  }
+                        }, 2500)
+                    }
+                }, __kk_watchdogIntervalMs)
+            }
+
+            const __kk_stopWatchdog = () => {
+                if(__kk_watchdogTimer != null){
+                    clearInterval(__kk_watchdogTimer)
+                    __kk_watchdogTimer = null
+                }
+            }
+
+            __kk_startWatchdog()
             try {
                 await downloadManager.downloadWithRetry(
                     'test-url',
                     'test-path',
-                    (progress) => setDownloadPercentage(progress.percent || 0)
+                    (progress) => {
+                        const p = progress.percent || 0
+                        __kk_lastProgress = p
+                        __kk_lastUpdate = Date.now()
+                        setDownloadPercentage(p)
+                    }
                 )
                 loggerLaunchSuite.info('Enhanced download manager disponible')
             } catch (testErr) {
@@ -796,11 +843,16 @@ async function dlAsync(login = true) {
             }
             
             await fullRepairModule.download(percent => {
+                __kk_lastProgress = percent
+                __kk_lastUpdate = Date.now()
                 setDownloadPercentage(percent)
             })
+            __kk_stopWatchdog()
             setDownloadPercentage(100)
             
         } catch(err) {
+            // Asegurar limpieza del watchdog en caso de error.
+            try { if(typeof __kk_stopWatchdog === 'function') __kk_stopWatchdog() } catch(e){ /* noop */ }
             loggerLaunchSuite.error('Error during file download:', err.message)
             
             let errorMessage = Lang.queryJS('landing.dlAsync.seeConsoleForDetails')
