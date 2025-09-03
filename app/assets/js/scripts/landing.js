@@ -901,15 +901,15 @@ async function dlAsync(login = true) {
         const authUser = ConfigManager.getSelectedAccount()
         
         loggerLaunchSuite.info(`Validating Microsoft session for: ${authUser.displayName}`)
-        setLaunchDetails('Validating Microsoft...')
+        setLaunchDetails('Validando Microsoft...')
         
         try {
             const isValidSession = await AuthManager.validateSelected()
             if (!isValidSession) {
                 loggerLaunchSuite.error(`Invalid session for ${authUser.displayName}`)
                 showLaunchFailure(
-                    'Invalid session',
-                    `Your Microsoft session has expired. Please log in again.`
+                    'Sesión inválida',
+                    `Tu sesión de Microsoft ha expirado. Por favor, inicia sesión nuevamente.`
                 )
                 setTimeout(() => {
                     const acc = ConfigManager.getSelectedAccount()
@@ -925,8 +925,8 @@ async function dlAsync(login = true) {
         } catch(err) {
             loggerLaunchSuite.error('Error validating Microsoft session:', err)
             showLaunchFailure(
-                'Authentication error',
-                'Could not validate your session. Please restart the launcher and try again.'
+                'Error de autenticación',
+                'No se pudo validar tu sesión. Por favor, reinicia el launcher e inténtalo de nuevo.'
             )
             return
         }
@@ -938,8 +938,8 @@ async function dlAsync(login = true) {
             if (!isWhitelisted) {
                 loggerLaunchSuite.error(`User ${authUser.displayName} not in whitelist`)
                 showLaunchFailure(
-                    Lang.queryJS('landing.whitelist.notWhitelisted') || 'Not in whitelist',
-                    Lang.queryJS('landing.whitelist.contactAdmin') || 'Contact administrator to request server access.'
+                    Lang.queryJS('landing.whitelist.notWhitelisted') || 'No estás en la whitelist',
+                    Lang.queryJS('landing.whitelist.contactAdmin') || 'Contacta al administrador para solicitar acceso al servidor.'
                 )
                 return
             }
