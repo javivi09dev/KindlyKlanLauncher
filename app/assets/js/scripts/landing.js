@@ -1,23 +1,19 @@
-/**
- * Script for landing.ejs
- */
-// Requirements
-const { URL }                 = require('url')
+const { URL } = require('url')
 const {
     MojangRestAPI,
     getServerStatus
-}                             = require('helios-core/mojang')
+} = require('helios-core/mojang')
 const {
     RestResponseStatus,
     isDisplayableError,
     validateLocalFile
-}                             = require('helios-core/common')
+} = require('helios-core/common')
 const {
     FullRepair,
     DistributionIndexProcessor,
     MojangIndexProcessor,
     downloadFile
-}                             = require('helios-core/dl')
+} = require('helios-core/dl')
 const {
     validateSelectedJvm,
     ensureJavaDirIsRoot,
@@ -25,22 +21,20 @@ const {
     discoverBestJvmInstallation,
     latestOpenJDK,
     extractJdk
-}                             = require('helios-core/java')
+} = require('helios-core/java')
 
-// Internal Requirements
-const DiscordWrapper          = require('./assets/js/discordwrapper')
-const ProcessBuilder          = require('./assets/js/processbuilder')
-const { proxyInstance }       = require('./assets/js/tcpproxy')
+const DiscordWrapper = require('./assets/js/discordwrapper')
+const ProcessBuilder = require('./assets/js/processbuilder')
+const { proxyInstance } = require('./assets/js/tcpproxy')
 const { EnhancedDownloadManager } = require('./assets/js/downloadmanager')
 
-// Launch Elements
-const launch_content          = document.getElementById('launch_content')
-const launch_details          = document.getElementById('launch_details')
-const launch_progress         = document.getElementById('launch_progress')
-const launch_progress_label   = document.getElementById('launch_progress_label')
-const launch_details_text     = document.getElementById('launch_details_text')
+const launch_content = document.getElementById('launch_content')
+const launch_details = document.getElementById('launch_details')
+const launch_progress = document.getElementById('launch_progress')
+const launch_progress_label = document.getElementById('launch_progress_label')
+const launch_details_text = document.getElementById('launch_details_text')
 const server_selection_button = document.getElementById('server_selection_button')
-const user_text               = document.getElementById('user_text')
+const user_text = document.getElementById('user_text')
 
 const loggerLanding = LoggerUtil.getLogger('Landing')
 
@@ -62,7 +56,7 @@ async function fetchAndApplyServerStatusConfig() {
                 'Pragma': 'no-cache'
             }
         })
-        if (!response.ok) throw new Error('No se pudo obtener el JSON de estado')
+        if (!response.ok) throw new Error('Failed to get status JSON')
         const data = await response.json()
         hideServerAndMojangStatus = data.serverAndMojangStatus === false
         applyServerStatusUI()
@@ -103,33 +97,33 @@ async function checkWhitelist(username) {
             }
         })
         if (!response.ok) {
-            loggerLanding.error('Error al obtener la whitelist:', response.status)
+            loggerLanding.error('Error getting whitelist:', response.status)
             return true
         }
         
         const whitelistData = await response.json()
         
         if (whitelistData.whitelist === false) {
-            loggerLanding.info('La whitelist está desactivada, permitiendo acceso')
+            loggerLanding.info('Whitelist disabled, allowing access')
             return true
         }
         
         if (whitelistData.allowedUsers) {
-            loggerLanding.info('Formato de whitelist encontrado: allowedUsers')
+            loggerLanding.info('Whitelist format found: allowedUsers')
             return whitelistData.allowedUsers.some(entry => 
                 typeof entry === 'string' && entry.toLowerCase() === username.toLowerCase()
             )
         }
         
         if (Array.isArray(whitelistData)) {
-            loggerLanding.info('Formato de whitelist encontrado: array')
+            loggerLanding.info('Whitelist format found: array')
             return whitelistData.some(entry => 
                 typeof entry === 'string' ? 
                     entry.toLowerCase() === username.toLowerCase() : 
                     entry.name && entry.name.toLowerCase() === username.toLowerCase()
             )
         } else if (typeof whitelistData === 'object') {
-            loggerLanding.info('Formato de whitelist encontrado: objeto')
+            loggerLanding.info('Whitelist format found: object')
             return whitelistData[username.toLowerCase()] !== undefined || 
                    Object.values(whitelistData).some(v => 
                        typeof v === 'string' ? 
@@ -138,18 +132,15 @@ async function checkWhitelist(username) {
                    )
         }
         
-        loggerLanding.warn('Formato de whitelist no reconocido')
+        loggerLanding.warn('Unknown whitelist format')
         return false
     } catch (err) {
-        loggerLanding.error('Error al verificar whitelist:', err)
+        loggerLanding.error('Error checking whitelist:', err)
         return true
     }
 }
 
-/**
- * Actualiza el botón de lanzamiento según el estado de whitelist del usuario
- * @param {Object} authUser Objeto de usuario autenticado
- */
+
 async function updateLaunchButtonWhitelist(authUser) {
     if (!authUser || !authUser.displayName) {
         setLaunchEnabled(false)
@@ -159,16 +150,13 @@ async function updateLaunchButtonWhitelist(authUser) {
     const isWhitelisted = await checkWhitelist(authUser.displayName)
     
     if (!isWhitelisted) {
-        loggerLanding.warn(`Usuario ${authUser.displayName} no está en la whitelist`)
-        // Oculta todo el contenido principal del launcher
+        loggerLanding.warn(`User ${authUser.displayName} not in whitelist`)
         $('#main').hide()
-        // Muestra el bloqueador con animación
         const blocker = document.getElementById('whitelistBlocker')
         blocker.style.display = 'flex'
         setTimeout(() => blocker.setAttribute('visible', ''), 10)
-        // Actualiza el mensaje y descripción
-        document.querySelector('#whitelistBlockerContent h2').textContent = 'No estás en la whitelist'
-        document.querySelector('#whitelistBlockerContent p').innerHTML = `Contacta con el equipo de <b>Kindly Klan</b>.<br>Estás logeado como "${authUser.displayName}".`
+        document.querySelector('#whitelistBlockerContent h2').textContent = 'Not in whitelist'
+        document.querySelector('#whitelistBlockerContent p').innerHTML = `Contact the <b>Kindly Klan</b> team.<br>Logged in as "${authUser.displayName}".`
         document.getElementById('frameBar').style.zIndex = 10000
         document.getElementById('whitelistLogoutBtn').onclick = async () => {
             const acc = ConfigManager.getSelectedAccount()
@@ -183,7 +171,7 @@ async function updateLaunchButtonWhitelist(authUser) {
         }
         return
     } else {
-        loggerLanding.info('Usuario en whitelist, mostrando main y ocultando bloqueador')
+        loggerLanding.info('User in whitelist, showing main and hiding blocker')
         document.getElementById('whitelistBlocker').style.display = 'none'
         $('#main').show()
         const serverSelected = ConfigManager.getSelectedServer() != null
@@ -256,13 +244,12 @@ async function fetchRemoteJavaConfig() {
         }
     });
     if (!response.ok) {
-        throw new Error(`Error al obtener config Java remoto: ${response.status}`);
+        throw new Error(`Error getting remote Java config: ${response.status}`);
     }
     return response.json();
 }
 
 async function checkAndApplyRemoteJavaConfig(launchAfter = true) {
-    // Si la pantalla de whitelist está visible, no hacer nada
     const blocker = document.getElementById('whitelistBlocker')
     if (blocker && blocker.hasAttribute('visible')) {
         return
@@ -281,10 +268,10 @@ async function checkAndApplyRemoteJavaConfig(launchAfter = true) {
             }
         }
         if (currentVersion !== remoteVersion) {
-            loggerLanding.info(`Java remoto ${remoteVersion} requerido, descargando/seleccionando...`);
+            loggerLanding.info(`Remote Java ${remoteVersion} required, downloading/selecting...`);
             setOverlayContent(
-                'Descargando Java...',
-                'Espera unos instantes. Estamos haciendo magia por ti. Tardará unos minutos.',
+                'Downloading Java...',
+                'Please wait. This will take a few minutes.',
                 null
             );
             toggleOverlay(true, false, 'overlayContent');
@@ -301,17 +288,15 @@ async function checkAndApplyRemoteJavaConfig(launchAfter = true) {
             }
             toggleOverlay(false);
             toggleLaunchArea(false);
-            loggerLanding.info(`Java ${remoteVersion} aplicado según configuración remota`);
+            loggerLanding.info(`Java ${remoteVersion} applied from remote config`);
         }
     } catch (err) {
-        loggerLanding.warn('No se pudo aplicar configuración Java remoto:', err);
+        loggerLanding.warn('Could not apply remote Java config:', err);
         toggleOverlay(false);
     }
 }
 
-// Bind launch button
 document.getElementById('launch_button').addEventListener('click', async e => {
-    // Aplico configuración Java remota antes de iniciar
     await checkAndApplyRemoteJavaConfig(true);
     loggerLanding.info('Launching game..')
     try {
@@ -320,7 +305,6 @@ document.getElementById('launch_button').addEventListener('click', async e => {
         if(jExe == null){
             await asyncSystemScan(server.effectiveJavaOptions)
         } else {
-
             setLaunchDetails(Lang.queryJS('landing.launch.pleaseWait'))
             toggleLaunchArea(true)
             setLaunchPercentage(0, 100)
@@ -329,29 +313,36 @@ document.getElementById('launch_button').addEventListener('click', async e => {
             if(details != null){
                 loggerLanding.info('Jvm Details', details)
                 await dlAsync()
-
             } else {
                 await asyncSystemScan(server.effectiveJavaOptions)
             }
         }
     } catch(err) {
-        loggerLanding.error('Unhandled error in during launch process.', err)
+        loggerLanding.error('Unhandled error during launch process.', err)
         showLaunchFailure(Lang.queryJS('landing.launch.failureTitle'), Lang.queryJS('landing.launch.failureText'))
     }
 })
 
-// Bind settings button
 document.getElementById('settingsMediaButton').onclick = async e => {
     await prepareSettings()
     switchView(getCurrentView(), VIEWS.settings)
+    try {
+        DiscordWrapper.showLauncherActivity(DiscordWrapper.LAUNCHER_STATES.SETTINGS)
+    } catch (err) {
+        loggerLanding.warn('Could not update Discord RPC:', err.message)
+    }
 }
 
-// Bind avatar overlay button.
 document.getElementById('avatarOverlay').onclick = async e => {
     await prepareSettings()
     switchView(getCurrentView(), VIEWS.settings, 500, 500, () => {
         settingsNavItemListener(document.getElementById('settingsNavAccount'), false)
     })
+    try {
+        DiscordWrapper.showLauncherActivity(DiscordWrapper.LAUNCHER_STATES.ACCOUNT_MANAGEMENT)
+    } catch (err) {
+        loggerLanding.warn('Could not update Discord RPC:', err.message)
+    }
 }
 
 // Bind selected account
@@ -370,7 +361,38 @@ function updateSelectedAccount(authUser){
 }
 updateSelectedAccount(ConfigManager.getSelectedAccount())
 
-// Bind selected server
+async function initLauncherDiscordRPC() {
+    try {
+        const distro = await DistroAPI.getDistribution()
+        if (distro && distro.rawDistribution.discord) {
+            const defaultServer = distro.getServerById(ConfigManager.getSelectedServer())
+            const serverDiscord = defaultServer ? defaultServer.rawServer.discord : {
+                shortId: "KK",
+                largeImageText: "Kindly Klan Launcher",
+                largeImageKey: "kindly-logo"
+            }
+            
+            DiscordWrapper.initRPC(distro.rawDistribution.discord, serverDiscord)
+            loggerLanding.info('Discord RPC initialized for launcher')
+        } else {
+            const tempDiscordConfig = {
+                clientId: "TU_CLIENT_ID_AQUI",
+                smallImageText: "Kindly Klan",
+                smallImageKey: "kindly-logo"
+            }
+            const tempServerConfig = {
+                shortId: "KK",
+                largeImageText: "Kindly Klan Launcher",
+                largeImageKey: "kindly-logo"
+            }
+            DiscordWrapper.initRPC(tempDiscordConfig, tempServerConfig)
+            loggerLanding.info('Discord RPC initialized with temporary config')
+        }
+    } catch (err) {
+        loggerLanding.warn('Could not initialize Discord RPC for launcher:', err.message)
+    }
+}
+
 function updateSelectedServer(serv){
     if(getCurrentView() === VIEWS.settings){
         fullSettingsSave()
@@ -382,22 +404,24 @@ function updateSelectedServer(serv){
         animateSettingsTabRefresh()
     }
     setLaunchEnabled(serv != null)
-    // Aplico configuración Java remota al cambiar de instancia
     checkAndApplyRemoteJavaConfig(false);
     fetchAndApplyServerStatusConfig();
-    // Reiniciar proxy TCP con nueva configuración si es necesario
     proxyInstance.restartProxy().catch(err => {
-        loggerLanding.warn('Error al reiniciar proxy TCP:', err)
+        loggerLanding.warn('Error restarting TCP proxy:', err)
     });
 }
-// Real text is set in uibinder.js on distributionIndexDone.
+
 server_selection_button.innerHTML = '&#8226; ' + Lang.queryJS('landing.selectedServer.loading')
 server_selection_button.onclick = async e => {
     e.target.blur()
     await toggleServerSelection(true)
+    try {
+        DiscordWrapper.showLauncherActivity(DiscordWrapper.LAUNCHER_STATES.SERVER_SELECTION)
+    } catch (err) {
+        loggerLanding.warn('Could not update Discord RPC:', err.message)
+    }
 }
 
-// Update Mojang Status Color
 const refreshMojangStatuses = async function(){
     loggerLanding.info('Refreshing Mojang Statuses..')
 
@@ -490,17 +514,17 @@ const refreshServerStatus = async (fade = false) => {
 refreshMojangStatuses()
 // Server Status is refreshed in uibinder.js on distributionIndexDone.
 
+DistroAPI.getDistribution().then(() => {
+    initLauncherDiscordRPC()
+}).catch(err => {
+    loggerLanding.warn('Could not initialize Discord RPC:', err.message)
+})
+
 // Refresh statuses every hour. The status page itself refreshes every day so...
 let mojangStatusListener = setInterval(() => refreshMojangStatuses(true), 60*60*1000)
 // Set refresh rate to once every 5 minutes.
 let serverStatusListener = setInterval(() => refreshServerStatus(true), 300000)
 
-/**
- * Shows an error overlay, toggles off the launch area.
- * 
- * @param {string} title The overlay title.
- * @param {string} desc The overlay description.
- */
 function showLaunchFailure(title, desc){
     setOverlayContent(
         title,
@@ -512,15 +536,7 @@ function showLaunchFailure(title, desc){
     toggleLaunchArea(false)
 }
 
-/* System (Java) Scan */
-
-/**
- * Asynchronously scan the system for valid Java installations.
- * 
- * @param {boolean} launchAfter Whether we should begin to launch after scanning. 
- */
 async function asyncSystemScan(effectiveJavaOptions, launchAfter = true){
-
     setLaunchDetails(Lang.queryJS('landing.systemScan.checking'))
     toggleLaunchArea(true)
     setLaunchPercentage(0, 100)
@@ -592,9 +608,6 @@ async function asyncSystemScan(effectiveJavaOptions, launchAfter = true){
 }
 
 async function downloadJava(effectiveJavaOptions, launchAfter = true) {
-
-    // TODO Error handling.
-    // asset can be null.
     const asset = await latestOpenJDK(
         effectiveJavaOptions.suggestedMajor,
         ConfigManager.getDataDirectory(),
@@ -604,7 +617,6 @@ async function downloadJava(effectiveJavaOptions, launchAfter = true) {
         throw new Error(Lang.queryJS('landing.downloadJava.findJdkFailure'))
     }
 
-    // Usar el gestor de descargas mejorado para Java
     try {
         await downloadManager.downloadWithRetry(
             asset.url, 
@@ -615,7 +627,6 @@ async function downloadJava(effectiveJavaOptions, launchAfter = true) {
         )
         setDownloadPercentage(100)
         
-        // Validar el archivo descargado
         if(!await validateLocalFile(asset.path, asset.algo, asset.hash)) {
             loggerLanding.error(`Java download hash validation failed for ${asset.id}`)
             throw new Error(Lang.queryJS('landing.downloadJava.javaDownloadCorruptedError'))
@@ -745,11 +756,11 @@ async function dlAsync(login = true) {
         }
     })
 
-    setLaunchDetails('Optimizando red...')
+    setLaunchDetails('Optimizing network...')
     try {
         await downloadManager.optimizeConfig()
     } catch (err) {
-        loggerLaunchSuite.warn('No se pudo optimizar configuración de red:', err.message)
+        loggerLaunchSuite.warn('Could not optimize network config:', err.message)
     }
 
     loggerLaunchSuite.info('Validating files.')
@@ -770,9 +781,9 @@ async function dlAsync(login = true) {
     } catch (err) {
         loggerLaunchSuite.error('Error during file validation:', err.message)
         if (err.message === 'Validation timeout') {
-            showLaunchFailure('Validación demorada', 'La validación de archivos está tomando demasiado tiempo. Inténtalo de nuevo o contacta soporte.')
+            showLaunchFailure('Validation delayed', 'File validation is taking too long. Try again or contact support.')
         } else {
-        showLaunchFailure(Lang.queryJS('landing.dlAsync.errorDuringFileVerificationTitle'), err.displayable || Lang.queryJS('landing.dlAsync.seeConsoleForDetails'))
+            showLaunchFailure(Lang.queryJS('landing.dlAsync.errorDuringFileVerificationTitle'), err.displayable || Lang.queryJS('landing.dlAsync.seeConsoleForDetails'))
         }
         return
     }
@@ -794,10 +805,9 @@ async function dlAsync(login = true) {
                 if(__kk_watchdogTimer != null) return
                 __kk_watchdogTimer = setInterval(() => {
                     const now = Date.now()
-                    // Consideramos "bloqueo" si el progreso está muy alto y no cambia por mucho tiempo.
                     if(__kk_lastProgress >= 98 && (now - __kk_lastUpdate) >= __kk_stuckThresholdMs){
                         try {
-                            loggerLaunchSuite.warn(`Descarga aparentemente bloqueada en ${__kk_lastProgress}%. Reiniciando launcher...`)
+                            loggerLaunchSuite.warn(`Download apparently stuck at ${__kk_lastProgress}%. Restarting launcher...`)
                             if(fullRepairModule && fullRepairModule.childProcess){
                                 try { fullRepairModule.childProcess.kill() } catch(e) {  }
                             }
@@ -806,7 +816,7 @@ async function dlAsync(login = true) {
                             __kk_watchdogTimer = null
                         }
                         try {
-                            showLaunchFailure('Descarga tardando demasiado', 'Ups! La descarga parece haberse bloqueado. El launcher se reiniciará automáticamente.')
+                            showLaunchFailure('Download taking too long', 'Oops! The download seems to be stuck. The launcher will restart automatically.')
                         } catch(e){ }
                         setTimeout(() => {
                             try {
@@ -837,9 +847,9 @@ async function dlAsync(login = true) {
                         setDownloadPercentage(p)
                     }
                 )
-                loggerLaunchSuite.info('Enhanced download manager disponible')
+                loggerLaunchSuite.info('Enhanced download manager available')
             } catch (testErr) {
-                loggerLaunchSuite.warn('Enhanced download manager no disponible, usando sistema original')
+                loggerLaunchSuite.warn('Enhanced download manager not available, using original system')
             }
             
             await fullRepairModule.download(percent => {
@@ -851,15 +861,14 @@ async function dlAsync(login = true) {
             setDownloadPercentage(100)
             
         } catch(err) {
-            // Asegurar limpieza del watchdog en caso de error.
             try { if(typeof __kk_stopWatchdog === 'function') __kk_stopWatchdog() } catch(e){ /* noop */ }
             loggerLaunchSuite.error('Error during file download:', err.message)
             
             let errorMessage = Lang.queryJS('landing.dlAsync.seeConsoleForDetails')
             if (err.message.includes('timeout')) {
-                errorMessage = 'La descarga se agotó el tiempo. Verifica tu conexión a internet e inténtalo de nuevo.'
+                errorMessage = 'Download timed out. Check your internet connection and try again.'
             } else if (err.message.includes('ENOTFOUND') || err.message.includes('ECONNREFUSED')) {
-                errorMessage = 'No se pudo conectar al servidor. Verifica tu conexión a internet.'
+                errorMessage = 'Could not connect to server. Check your internet connection.'
             }
             
             showLaunchFailure(Lang.queryJS('landing.dlAsync.errorDuringFileDownloadTitle'), errorMessage)
@@ -891,16 +900,16 @@ async function dlAsync(login = true) {
     if(login) {
         const authUser = ConfigManager.getSelectedAccount()
         
-        loggerLaunchSuite.info(`Validando sesión de Microsoft para: ${authUser.displayName}`)
-        setLaunchDetails('Validando Microsoft...')
+        loggerLaunchSuite.info(`Validating Microsoft session for: ${authUser.displayName}`)
+        setLaunchDetails('Validating Microsoft...')
         
         try {
             const isValidSession = await AuthManager.validateSelected()
             if (!isValidSession) {
-                loggerLaunchSuite.error(`Sesión inválida para ${authUser.displayName}`)
+                loggerLaunchSuite.error(`Invalid session for ${authUser.displayName}`)
                 showLaunchFailure(
-                    'Sesión no válida',
-                    `Tu sesión de Microsoft ha expirado. Por favor, vuelve a iniciar sesión.`
+                    'Invalid session',
+                    `Your Microsoft session has expired. Please log in again.`
                 )
                 setTimeout(() => {
                     const acc = ConfigManager.getSelectedAccount()
@@ -912,30 +921,30 @@ async function dlAsync(login = true) {
                 }, 3000)
                 return
             }
-            loggerLaunchSuite.info('Sesión de Microsoft validada correctamente')
+            loggerLaunchSuite.info('Microsoft session validated successfully')
         } catch(err) {
-            loggerLaunchSuite.error('Error al validar sesión de Microsoft:', err)
+            loggerLaunchSuite.error('Error validating Microsoft session:', err)
             showLaunchFailure(
-                'Error de autenticación',
-                'No se pudo validar tu sesión. Por favor, reinicia el launcher e intenta de nuevo.'
+                'Authentication error',
+                'Could not validate your session. Please restart the launcher and try again.'
             )
             return
         }
         
-        loggerLaunchSuite.info(`Verificando whitelist para: ${authUser.displayName}`)
-        setLaunchDetails('Verificando acceso...')
+        loggerLaunchSuite.info(`Checking whitelist for: ${authUser.displayName}`)
+        setLaunchDetails('Checking access...')
         try {
             const isWhitelisted = await checkWhitelist(authUser.displayName)
             if (!isWhitelisted) {
-                loggerLaunchSuite.error(`Usuario ${authUser.displayName} no está en la whitelist`)
+                loggerLaunchSuite.error(`User ${authUser.displayName} not in whitelist`)
                 showLaunchFailure(
-                    Lang.queryJS('landing.whitelist.notWhitelisted') || 'No estás en la whitelist',
-                    Lang.queryJS('landing.whitelist.contactAdmin') || 'Contacta al administrador para solicitar acceso al servidor.'
+                    Lang.queryJS('landing.whitelist.notWhitelisted') || 'Not in whitelist',
+                    Lang.queryJS('landing.whitelist.contactAdmin') || 'Contact administrator to request server access.'
                 )
                 return
             }
             
-            loggerLaunchSuite.info(`Enviando cuenta seleccionada (${authUser.displayName}) a ProcessBuilder.`)
+            loggerLaunchSuite.info(`Sending selected account (${authUser.displayName}) to ProcessBuilder.`)
             let pb = new ProcessBuilder(serv, versionData, modLoaderData, authUser, remote.app.getVersion())
 
             const SERVER_JOINED_REGEX = new RegExp(`\\[.+\\]: \\[CHAT\\] ${authUser.displayName} joined the game`)
@@ -997,13 +1006,12 @@ async function dlAsync(login = true) {
 
                 setLaunchDetails(Lang.queryJS('landing.dlAsync.doneEnjoyServer'))
 
-                // Init Discord Hook
-                loggerLaunchSuite.info('=== VERIFICANDO DISCORD RPC ===')
+                loggerLaunchSuite.info('=== CHECKING DISCORD RPC ===')
                 loggerLaunchSuite.info('distro.rawDistribution.discord:', distro.rawDistribution.discord)
                 loggerLaunchSuite.info('serv.rawServer.discord:', serv.rawServer.discord)
                 
                 if(distro.rawDistribution.discord != null && serv.rawServer.discord != null){
-                    loggerLaunchSuite.info('INICIANDO Discord RPC...')
+                    loggerLaunchSuite.info('STARTING Discord RPC...')
                     DiscordWrapper.initRPC(distro.rawDistribution.discord, serv.rawServer.discord)
                     hasRPC = true
                     proc.on('close', (code, signal) => {
@@ -1011,11 +1019,18 @@ async function dlAsync(login = true) {
                         DiscordWrapper.shutdownRPC()
                         hasRPC = false
                         
-                        // Calcular y guardar tiempo de juego cuando se cierra el proceso
+                        setTimeout(() => {
+                            try {
+                                initLauncherDiscordRPC()
+                            } catch (err) {
+                                loggerLaunchSuite.warn('Could not restore launcher Discord RPC:', err.message)
+                            }
+                        }, 1000)
+                        
                         if(gameStartTime != null && currentServer != null) {
                             const now = Date.now()
-                            const playedMinutes = Math.floor((now - gameStartTime) / 60000) // Convertir ms a minutos
-                            loggerLaunchSuite.info(`Añadiendo ${playedMinutes} minutos de tiempo de juego a ${currentServer}`)
+                            const playedMinutes = Math.floor((now - gameStartTime) / 60000)
+                            loggerLaunchSuite.info(`Adding ${playedMinutes} minutes of playtime to ${currentServer}`)
                             ConfigManager.addPlayTime(currentServer, playedMinutes)
                             ConfigManager.save()
                             gameStartTime = null
@@ -1023,13 +1038,13 @@ async function dlAsync(login = true) {
                         }
                         
                         proc = null
-                        loggerLaunchSuite.info('Proceso de Minecraft terminado, referencia limpiada')
+                        loggerLaunchSuite.info('Minecraft process ended, reference cleaned')
                     })
                 } else {
-                    loggerLaunchSuite.warn('=== DISCORD RPC NO INICIADO ===')
-                    loggerLaunchSuite.warn('Razón: distro.discord o server.discord es null')
+                    loggerLaunchSuite.warn('=== DISCORD RPC NOT STARTED ===')
+                    loggerLaunchSuite.warn('Reason: distro.discord or server.discord is null')
                     
-                    loggerLaunchSuite.info('Probando con configuración hardcodeada...')
+                    loggerLaunchSuite.info('Trying with hardcoded config...')
                     const tempDiscordConfig = {
                         clientId: "TU_CLIENT_ID_AQUI",
                         smallImageText: "Kindly Klan",
@@ -1037,31 +1052,40 @@ async function dlAsync(login = true) {
                     }
                     const tempServerConfig = {
                         shortId: "KK",
-                        largeImageText: "Jugando en Kindly Klan",
+                        largeImageText: "Playing on Kindly Klan",
                         largeImageKey: "server-kindly"
                     }
                     
                     try {
                         DiscordWrapper.initRPC(tempDiscordConfig, tempServerConfig)
                         hasRPC = true
-                        loggerLaunchSuite.info('Discord RPC iniciado con configuración temporal')
-                    proc.on('close', (code, signal) => {
+                        loggerLaunchSuite.info('Discord RPC started with temporary config')
+                                            proc.on('close', (code, signal) => {
                             loggerLaunchSuite.info('Shutting down Discord Rich Presence..')
                             DiscordWrapper.shutdownRPC()
                             hasRPC = false
                             
-                        if(gameStartTime != null && currentServer != null) {
-                            const now = Date.now()
+                            // Volver a mostrar actividad del launcher
+                            setTimeout(() => {
+                                try {
+                                    initLauncherDiscordRPC()
+                                } catch (err) {
+                                    loggerLaunchSuite.warn('No se pudo restaurar Discord RPC del launcher:', err.message)
+                                }
+                            }, 1000)
+                            
+                            if(gameStartTime != null && currentServer != null) {
+                                const now = Date.now()
                                 const playedMinutes = Math.floor((now - gameStartTime) / 60000)
-                            loggerLaunchSuite.info(`Añadiendo ${playedMinutes} minutos de tiempo de juego a ${currentServer}`)
-                            ConfigManager.addPlayTime(currentServer, playedMinutes)
-                            ConfigManager.save()
-                            gameStartTime = null
-                            currentServer = null
-                        }
-                        
-                        proc = null
-                            loggerLaunchSuite.info('Proceso de Minecraft terminado, referencia limpiada')
+                                loggerLaunchSuite.info(`Añadiendo ${playedMinutes} minutos de tiempo de juego a ${currentServer}`)
+                                ConfigManager.addPlayTime(currentServer, playedMinutes)
+                                ConfigManager.save()
+                                gameStartTime = null
+                                currentServer = null
+                            }
+                            
+                            proc = null
+                                loggerLaunchSuite.info('Proceso de Minecraft terminado, referencia limpiada')
                         })
                     } catch (err) {
                         loggerLaunchSuite.error('Error al iniciar Discord RPC temporal:', err)
@@ -1091,37 +1115,28 @@ async function dlAsync(login = true) {
     } catch (error) {
         loggerLaunchSuite.error('Error during whitelist verification:', error)
         showLaunchFailure(
-            Lang.queryJS('landing.whitelist.verificationError') || 'Error al verificar la whitelist',
-            Lang.queryJS('landing.whitelist.contactAdmin') || 'Contacta al administrador para más detalles.'
+            Lang.queryJS('landing.whitelist.verificationError') || 'Error verifying whitelist',
+            Lang.queryJS('landing.whitelist.contactAdmin') || 'Contact administrator for more details.'
         )
         return
         }
     }
 }
 
-/**
- * News Loading Functions
- */
 
-// DOM Cache
-const newsContent                   = document.getElementById('newsContent')
-const newsArticleTitle              = document.getElementById('newsArticleTitle')
-const newsArticleDate               = document.getElementById('newsArticleDate')
-const newsArticleAuthor             = document.getElementById('newsArticleAuthor')
-const newsArticleComments           = document.getElementById('newsArticleComments')
-const newsNavigationStatus          = document.getElementById('newsNavigationStatus')
-const newsArticleContentScrollable  = document.getElementById('newsArticleContentScrollable')
-const nELoadSpan                    = document.getElementById('nELoadSpan')
 
-// News slide caches.
+const newsContent = document.getElementById('newsContent')
+const newsArticleTitle = document.getElementById('newsArticleTitle')
+const newsArticleDate = document.getElementById('newsArticleDate')
+const newsArticleAuthor = document.getElementById('newsArticleAuthor')
+const newsArticleComments = document.getElementById('newsArticleComments')
+const newsNavigationStatus = document.getElementById('newsNavigationStatus')
+const newsArticleContentScrollable = document.getElementById('newsArticleContentScrollable')
+const nELoadSpan = document.getElementById('nELoadSpan')
+
 let newsActive = false
 let newsGlideCount = 0
 
-/**
- * Show the news UI via a slide animation.
- * 
- * @param {boolean} up True to slide up, otherwise false. 
- */
 function slide_(up){
     const lCUpper = document.querySelector('#landingContainer > #upper')
     const lCLLeft = document.querySelector('#landingContainer > #lower > #left')
@@ -1164,12 +1179,15 @@ function slide_(up){
     }
 }
 
-// Bind news button.
 document.getElementById('newsButton').onclick = () => {
-    // Toggle tabbing.
     if(newsActive){
         $('#landingContainer *').removeAttr('tabindex')
         $('#newsContainer *').attr('tabindex', '-1')
+        try {
+            DiscordWrapper.showLauncherActivity(DiscordWrapper.LAUNCHER_STATES.IDLE)
+        } catch (err) {
+            loggerLanding.warn('Could not update Discord RPC:', err.message)
+        }
     } else {
         $('#landingContainer *').attr('tabindex', '-1')
         $('#newsContainer, #newsContainer *, #lower, #lower #center *').removeAttr('tabindex')
@@ -1179,22 +1197,19 @@ document.getElementById('newsButton').onclick = () => {
             ConfigManager.setNewsCacheDismissed(true)
             ConfigManager.save()
         }
+        try {
+            DiscordWrapper.showLauncherActivity(DiscordWrapper.LAUNCHER_STATES.NEWS)
+        } catch (err) {
+            loggerLanding.warn('Could not update Discord RPC:', err.message)
+        }
     }
     slide_(!newsActive)
     newsActive = !newsActive
 }
 
-// Array to store article meta.
 let newsArr = null
-
-// News load animation listener.
 let newsLoadingListener = null
 
-/**
- * Set the news loading animation.
- * 
- * @param {boolean} val True to set loading animation, otherwise false.
- */
 function setNewsLoading(val){
     if(val){
         const nLStr = Lang.queryJS('landing.news.checking')
@@ -1216,7 +1231,6 @@ function setNewsLoading(val){
     }
 }
 
-// Bind retry button.
 newsErrorRetry.onclick = () => {
     $('#newsErrorFailed').fadeOut(250, () => {
         initNews()
@@ -1232,12 +1246,6 @@ newsArticleContentScrollable.onscroll = (e) => {
     }
 }
 
-/**
- * Reload the news without restarting.
- * 
- * @returns {Promise.<void>} A promise which resolves when the news
- * content has finished loading and transitioning.
- */
 function reloadNews(){
     return new Promise((resolve, reject) => {
         $('#newsContent').fadeOut(250, () => {
@@ -1251,9 +1259,6 @@ function reloadNews(){
 
 let newsAlertShown = false
 
-/**
- * Show the news alert indicating there is new news.
- */
 function showNewsAlert(){
     newsAlertShown = true
     $(newsButtonAlert).fadeIn(250)
@@ -1269,13 +1274,6 @@ async function digestMessage(str) {
     return hashHex
 }
 
-/**
- * Initialize News UI. This will load the news and prepare
- * the UI accordingly.
- * 
- * @returns {Promise.<void>} A promise which resolves when the news
- * content has finished loading and transitioning.
- */
 async function initNews(){
 
     setNewsLoading(true)
@@ -1285,14 +1283,12 @@ async function initNews(){
     newsArr = news?.articles || null
 
     if(newsArr == null){
-        // News Loading Failed
         setNewsLoading(false)
 
         await $('#newsErrorLoading').fadeOut(250).promise()
         await $('#newsErrorFailed').fadeIn(250).promise()
 
     } else if(newsArr.length === 0) {
-        // No News Articles
         setNewsLoading(false)
 
         ConfigManager.setNewsCache({
@@ -1305,7 +1301,6 @@ async function initNews(){
         await $('#newsErrorLoading').fadeOut(250).promise()
         await $('#newsErrorNone').fadeIn(250).promise()
     } else {
-        // Success
         setNewsLoading(false)
 
         const lN = newsArr[0]
@@ -1317,8 +1312,6 @@ async function initNews(){
         if(cached.date != null && cached.content != null){
 
             if(new Date(cached.date) >= newDate){
-
-                // Compare Content
                 if(cached.content !== newHash){
                     isNew = true
                     showNewsAlert()
@@ -1328,7 +1321,6 @@ async function initNews(){
                         showNewsAlert()
                     }
                 }
-
             } else {
                 isNew = true
                 showNewsAlert()
@@ -1365,18 +1357,11 @@ async function initNews(){
 
 }
 
-/**
- * Add keyboard controls to the news UI. Left and right arrows toggle
- * between articles. If you are on the landing page, the up arrow will
- * open the news UI.
- */
 document.addEventListener('keydown', (e) => {
     if(newsActive){
         if(e.key === 'ArrowRight' || e.key === 'ArrowLeft'){
             document.getElementById(e.key === 'ArrowRight' ? 'newsNavigateRight' : 'newsNavigateLeft').click()
         }
-        // Interferes with scrolling an article using the down arrow.
-        // Not sure of a straight forward solution at this point.
         // if(e.key === 'ArrowDown'){
         //     document.getElementById('newsButton').click()
         // }
@@ -1389,12 +1374,6 @@ document.addEventListener('keydown', (e) => {
     }
 })
 
-/**
- * Display a news article on the UI.
- * 
- * @param {Object} articleObject The article meta object.
- * @param {number} index The article index.
- */
 function displayArticle(articleObject, index){
     newsArticleTitle.innerHTML = articleObject.title
     newsArticleTitle.href = articleObject.link
@@ -1413,10 +1392,6 @@ function displayArticle(articleObject, index){
     newsContent.setAttribute('article', index-1)
 }
 
-/**
- * Load news information from the RSS feed specified in the
- * distribution index.
- */
 async function loadNews(){
 
     const distroData = await DistroAPI.getDistribution()
@@ -1436,17 +1411,13 @@ async function loadNews(){
                 const articles = []
 
                 for(let i=0; i<items.length; i++){
-                // JQuery Element
                     const el = $(items[i])
 
-                    // Resolve date.
                     const date = new Date(el.find('pubDate').text()).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric'})
 
-                    // Resolve comments.
                     let comments = el.find('slash\\:comments').text() || '0'
                     comments = comments + ' Comment' + (comments === '1' ? '' : 's')
 
-                    // Fix relative links in content.
                     let content = el.find('content\\:encoded').text()
                     let regex = /src="(?!http:\/\/|https:\/\/)(.+?)"/g
                     let matches
@@ -1458,7 +1429,6 @@ async function loadNews(){
                     let title  = el.find('title').text()
                     let author = el.find('dc\\:creator').text()
 
-                    // Generate article.
                     articles.push(
                         {
                             link,

@@ -4,9 +4,6 @@ const path = require('path')
 
 const logger = LoggerUtil.getLogger('DownloadMonitor')
 
-/**
- * Monitor de descargas
- */
 class DownloadMonitor {
     constructor() {
         this.downloadStats = new Map()
@@ -21,9 +18,6 @@ class DownloadMonitor {
         }
     }
 
-    /**
-     * Iniciar monitoreo de una descarga
-     */
     startDownload(url, expectedSize = 0) {
         const downloadId = this.generateDownloadId(url)
         this.downloadStats.set(downloadId, {
@@ -41,9 +35,6 @@ class DownloadMonitor {
         return downloadId
     }
 
-    /**
-     * Actualizar progreso de descarga
-     */
     updateProgress(downloadId, bytesDownloaded) {
         const stats = this.downloadStats.get(downloadId)
         if (stats) {
@@ -59,9 +50,6 @@ class DownloadMonitor {
         }
     }
 
-    /**
-     * Marcar descarga como completada
-     */
     completeDownload(downloadId, success = true, error = null) {
         const stats = this.downloadStats.get(downloadId)
         if (stats) {
@@ -92,9 +80,6 @@ class DownloadMonitor {
         }
     }
 
-    /**
-     * Registrar reintento de descarga
-     */
     recordRetry(downloadId, error) {
         const stats = this.downloadStats.get(downloadId)
         if (stats) {
@@ -125,9 +110,6 @@ class DownloadMonitor {
         }
     }
 
-    /**
-     * Generar reporte de sesión
-     */
     generateSessionReport() {
         const duration = Date.now() - this.sessionStats.startTime
         const successRate = this.sessionStats.totalDownloads > 0 
@@ -153,9 +135,6 @@ class DownloadMonitor {
         return report
     }
 
-    /**
-     * Analizar errores comunes
-     */
     analyzeCommonErrors() {
         const errorCounts = {}
         this.sessionStats.errors.forEach(error => {
@@ -169,9 +148,6 @@ class DownloadMonitor {
             .map(([error, count]) => ({ error, count }))
     }
 
-    /**
-     * Generar recomendaciones basadas en estadísticas
-     */
     generateRecommendations() {
         const recommendations = []
         const stats = this.sessionStats
@@ -179,7 +155,7 @@ class DownloadMonitor {
         if (stats.failedDownloads > stats.successfulDownloads) {
             recommendations.push({
                 type: 'critical',
-                message: 'Alta tasa de fallos de descarga. Verifica la conexión a internet.',
+                message: 'High download failure rate. Check internet connection.',
                 action: 'check_connection'
             })
         }
@@ -187,7 +163,7 @@ class DownloadMonitor {
         if (stats.slowDownloads.length > stats.totalDownloads * 0.3) {
             recommendations.push({
                 type: 'warning',
-                message: 'Muchas descargas lentas detectadas. Considera usar menos descargas concurrentes.',
+                message: 'Many slow downloads detected. Consider using fewer concurrent downloads.',
                 action: 'reduce_concurrency'
             })
         }
@@ -196,7 +172,7 @@ class DownloadMonitor {
         if (timeoutErrors > 3) {
             recommendations.push({
                 type: 'warning',
-                message: 'Múltiples timeouts detectados. Aumenta el tiempo de timeout.',
+                message: 'Multiple timeouts detected. Increase timeout time.',
                 action: 'increase_timeout'
             })
         }
@@ -207,7 +183,7 @@ class DownloadMonitor {
         if (networkErrors > 2) {
             recommendations.push({
                 type: 'critical',
-                message: 'Errores de conectividad de red. Verifica la configuración de red.',
+                message: 'Network connectivity errors. Check network configuration.',
                 action: 'check_network'
             })
         }
@@ -215,9 +191,6 @@ class DownloadMonitor {
         return recommendations
     }
 
-    /**
-     * Exportar estadísticas detalladas
-     */
     exportDetailedStats() {
         const detailedStats = {
             session: this.sessionStats,
@@ -231,15 +204,11 @@ class DownloadMonitor {
         return detailedStats
     }
 
-    /**
-     * Guardar reporte en archivo
-     */
     async saveReport(filepath) {
         try {
             const report = this.exportDetailedStats()
             const reportContent = JSON.stringify(report, null, 2)
             
-            // Crear directorio si no existe
             const dir = path.dirname(filepath)
             if (!fs.existsSync(dir)) {
                 fs.mkdirSync(dir, { recursive: true })
@@ -254,20 +223,13 @@ class DownloadMonitor {
         }
     }
 
-    /**
-     * Generar ID único para descarga
-     */
     generateDownloadId(url) {
         const timestamp = Date.now()
         const hash = url.split('/').pop() || 'unknown'
         return `${hash}_${timestamp}`
     }
 
-    /**
-     * Limpiar estadísticas antiguas
-     */
     cleanup() {
-        // Mantener solo las últimas 100 descargas
         if (this.downloadStats.size > 100) {
             const entries = Array.from(this.downloadStats.entries())
                 .sort(([,a], [,b]) => (b.startTime || 0) - (a.startTime || 0))
@@ -280,9 +242,6 @@ class DownloadMonitor {
         }
     }
 
-    /**
-     * Obtener estadísticas en tiempo real
-     */
     getRealTimeStats() {
         const activeDownloads = Array.from(this.downloadStats.values())
             .filter(stats => stats.status === 'downloading')

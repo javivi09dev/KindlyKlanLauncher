@@ -6,9 +6,6 @@ const http = require('http')
 
 const logger = LoggerUtil.getLogger('DownloadManager')
 
-/**
- * Gestor de descargas :)
- */
 class EnhancedDownloadManager {
     constructor(options = {}) {
         this.config = {
@@ -26,7 +23,7 @@ class EnhancedDownloadManager {
         const maxAttempts = this.config.maxRetries + 1
         
         try {
-            logger.info(`Descargando ${url} (intento ${attempt}/${maxAttempts})`)
+            logger.info(`Downloading ${url} (attempt ${attempt}/${maxAttempts})`)
             
             const downloadPromise = downloadFile(url, path, onProgress)
             const timeoutPromise = new Promise((_, reject) => {
@@ -34,11 +31,11 @@ class EnhancedDownloadManager {
             })
             
             await Promise.race([downloadPromise, timeoutPromise])
-            logger.info(`Descarga completada: ${url}`)
+            logger.info(`Download completed: ${url}`)
             return true
             
         } catch (error) {
-            logger.warn(`Fallo en descarga ${url} (intento ${attempt}): ${error.message}`)
+            logger.warn(`Download failed ${url} (attempt ${attempt}): ${error.message}`)
             
             if (attempt < maxAttempts && isRetryableError(error)) {
                 let delay = this.config.exponentialBackoff 
@@ -49,24 +46,21 @@ class EnhancedDownloadManager {
                     delay = Math.min(delay, this.config.maxRetryDelay)
                 }
                 
-                logger.info(`Reintentando en ${delay}ms... (error: ${error.code || error.message})`)
+                logger.info(`Retrying in ${delay}ms... (error: ${error.code || error.message})`)
                 await this.sleep(delay)
                 return this.downloadWithRetry(url, path, onProgress, attempt + 1)
                 
             } else if (attempt >= maxAttempts) {
-                logger.error(`Descarga fallida permanentemente después de ${maxAttempts} intentos: ${url}`)
+                logger.error(`Download permanently failed after ${maxAttempts} attempts: ${url}`)
                 throw new Error(`Download failed after ${maxAttempts} attempts: ${error.message}`)
                 
             } else {
-                logger.error(`Error no reintentable en descarga: ${url} - ${error.message}`)
+                logger.error(`Non-retryable error in download: ${url} - ${error.message}`)
                 throw error
             }
         }
     }
 
-    /**
-     * Descargar múltiples archivos con concurrencia limitada
-     */
     async downloadConcurrent(downloads, globalProgress) {
         const totalFiles = downloads.length
         let completedFiles = 0
@@ -111,12 +105,9 @@ class EnhancedDownloadManager {
         })
 
         await Promise.all(downloadPromises)
-        logger.info(`Todas las descargas completadas: ${totalFiles} archivos`)
+        logger.info(`All downloads completed: ${totalFiles} files`)
     }
 
-    /**
-     * Verificar conectividad de red
-     */
     async checkConnectivity(testUrl = 'https://files.kindlyklan.com:26500/ping') {
         try {
             const startTime = Date.now()
@@ -132,14 +123,11 @@ class EnhancedDownloadManager {
                 quality: responseTime < 1000 ? 'good' : responseTime < 3000 ? 'fair' : 'poor'
             }
         } catch (error) {
-            logger.warn('Error verificando conectividad:', error.message)
+            logger.warn('Error checking connectivity:', error.message)
             return { connected: false, responseTime: -1, quality: 'none' }
         }
     }
 
-    /**
-     * Optimizar configuración basada en conectividad
-     */
     async optimizeConfig() {
         try {
             const connectionQuality = await this.testConnectivity()
@@ -153,9 +141,6 @@ class EnhancedDownloadManager {
         }
     }
 
-    /**
-     * Probar conectividad y determinar calidad de conexión
-     */
     async testConnectivity() {
         const testPromises = testUrls.map(url => this.pingUrl(url))
         const results = await Promise.allSettled(testPromises)
@@ -173,9 +158,6 @@ class EnhancedDownloadManager {
         return 'default'
     }
 
-    /**
-     * Ping a la url de kk
-     */
     async pingUrl(url) {
         return new Promise((resolve, reject) => {
             const startTime = Date.now()
@@ -200,9 +182,6 @@ class EnhancedDownloadManager {
     }
 }
 
-/**
- * Semáforo para controlar concurrencia
- */
 class Semaphore {
     constructor(count) {
         this.count = count

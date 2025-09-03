@@ -1,14 +1,19 @@
-// Work in progress
 const { LoggerUtil } = require('helios-core')
-
 const logger = LoggerUtil.getLogger('DiscordWrapper')
-
 const { Client } = require('discord-rpc-patch')
-
 const Lang = require('./langloader')
 
 let client
 let activity
+let launcherActivity
+
+const LAUNCHER_STATES = {
+    IDLE: 'idle',
+    SETTINGS: 'settings',
+    NEWS: 'news',
+    SERVER_SELECTION: 'server_selection',
+    ACCOUNT_MANAGEMENT: 'account_management'
+}
 
 exports.initRPC = function(genSettings, servSettings, initialDetails = Lang.queryJS('discord.waiting')){
     client = new Client({ transport: 'ipc' })
@@ -24,9 +29,20 @@ exports.initRPC = function(genSettings, servSettings, initialDetails = Lang.quer
         instance: false
     }
 
+    launcherActivity = {
+        details: 'Navigating launcher',
+        state: 'discord.gg/kindlyklan',
+        largeImageKey: 'kindly-logo',
+        largeImageText: 'Kindly Klan Launcher',
+        smallImageKey: 'kindly-logo',
+        smallImageText: 'Kindly Klan',
+        startTimestamp: new Date().getTime(),
+        instance: false
+    }
+
     client.on('ready', () => {
         logger.info('Discord RPC Connected')
-        client.setActivity(activity)
+        client.setActivity(launcherActivity)
     })
     
     client.login({clientId: genSettings.clientId}).catch(error => {
@@ -39,8 +55,30 @@ exports.initRPC = function(genSettings, servSettings, initialDetails = Lang.quer
 }
 
 exports.updateDetails = function(details){
+    if (!client) return
+    
     activity.details = details
     client.setActivity(activity)
+}
+
+exports.showLauncherActivity = function(state = LAUNCHER_STATES.IDLE, customDetails = null) {
+    if (!client) return
+
+    let details = 'Navegando en el launcher'
+    let stateText = 'discord.gg/kindlyklan'
+
+    launcherActivity.details = details
+    launcherActivity.state = stateText
+    launcherActivity.startTimestamp = new Date().getTime()
+
+    client.setActivity(launcherActivity)
+}
+
+exports.returnToLauncher = function() {
+    if (!client) return
+    
+    logger.info('Returning to launcher Discord activity')
+    client.setActivity(launcherActivity)
 }
 
 exports.shutdownRPC = function(){
@@ -49,4 +87,7 @@ exports.shutdownRPC = function(){
     client.destroy()
     client = null
     activity = null
+    launcherActivity = null
 }
+
+exports.LAUNCHER_STATES = LAUNCHER_STATES
