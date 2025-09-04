@@ -756,7 +756,7 @@ async function dlAsync(login = true) {
         }
     })
 
-    setLaunchDetails('Optimizing network...')
+    setLaunchDetails('Optimizando red...')
     try {
         await downloadManager.optimizeConfig()
     } catch (err) {
@@ -921,9 +921,9 @@ async function dlAsync(login = true) {
                 }, 3000)
                 return
             }
-            loggerLaunchSuite.info('Microsoft session validated successfully')
+            loggerLaunchSuite.info('Sesión de Microsoft válida.')
         } catch(err) {
-            loggerLaunchSuite.error('Error validating Microsoft session:', err)
+            loggerLaunchSuite.error('Error validando sesión de Microsoft', err)
             showLaunchFailure(
                 'Error de autenticación',
                 'No se pudo validar tu sesión. Por favor, reinicia el launcher e inténtalo de nuevo.'
@@ -932,7 +932,7 @@ async function dlAsync(login = true) {
         }
         
         loggerLaunchSuite.info(`Checking whitelist for: ${authUser.displayName}`)
-        setLaunchDetails('Checking access...')
+        setLaunchDetails('Verificando acceso...')
         try {
             const isWhitelisted = await checkWhitelist(authUser.displayName)
             if (!isWhitelisted) {
@@ -1012,7 +1012,7 @@ async function dlAsync(login = true) {
                 
                 if(distro.rawDistribution.discord != null && serv.rawServer.discord != null){
                     loggerLaunchSuite.info('STARTING Discord RPC...')
-                    DiscordWrapper.initRPC(distro.rawDistribution.discord, serv.rawServer.discord)
+                    DiscordWrapper.initRPC(distro.rawDistribution.discord, serv.rawServer.discord, Lang.queryJS('discord.waiting'), true)
                     hasRPC = true
                     proc.on('close', (code, signal) => {
                         loggerLaunchSuite.info('Shutting down Discord Rich Presence..')
@@ -1057,7 +1057,7 @@ async function dlAsync(login = true) {
                     }
                     
                     try {
-                        DiscordWrapper.initRPC(tempDiscordConfig, tempServerConfig)
+                        DiscordWrapper.initRPC(tempDiscordConfig, tempServerConfig, Lang.queryJS('discord.waiting'), true)
                         hasRPC = true
                         loggerLaunchSuite.info('Discord RPC started with temporary config')
                                             proc.on('close', (code, signal) => {

@@ -15,9 +15,10 @@ const LAUNCHER_STATES = {
     ACCOUNT_MANAGEMENT: 'account_management'
 }
 
-exports.initRPC = function(genSettings, servSettings, initialDetails = Lang.queryJS('discord.waiting')){
+exports.initRPC = function(genSettings, servSettings, initialDetails = Lang.queryJS('discord.waiting'), isGameInstance = false){
     client = new Client({ transport: 'ipc' })
 
+    // activity: Configuración de Discord RPC de CADA instancia
     activity = {
         details: initialDetails,
         state: Lang.queryJS('discord.state', {shortId: servSettings.shortId}),
@@ -29,8 +30,9 @@ exports.initRPC = function(genSettings, servSettings, initialDetails = Lang.quer
         instance: false
     }
 
+    // launcherActivity: Configuración de Discord RPC cuando NO se juega a una instancia
     launcherActivity = {
-        details: 'Navigating launcher',
+        details: 'En el Launcher',
         state: 'discord.gg/kindlyklan',
         largeImageKey: 'kindly-logo',
         largeImageText: 'Kindly Klan Launcher',
@@ -42,7 +44,9 @@ exports.initRPC = function(genSettings, servSettings, initialDetails = Lang.quer
 
     client.on('ready', () => {
         logger.info('Discord RPC Connected')
-        client.setActivity(launcherActivity)
+        // Usar activity si es una instancia de juego, 
+        // sino usar launcherActivity
+        client.setActivity(isGameInstance ? activity : launcherActivity)
     })
     
     client.login({clientId: genSettings.clientId}).catch(error => {
