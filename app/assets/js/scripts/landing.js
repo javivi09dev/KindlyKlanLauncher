@@ -270,8 +270,8 @@ async function checkAndApplyRemoteJavaConfig(launchAfter = true) {
         if (currentVersion !== remoteVersion) {
             loggerLanding.info(`Remote Java ${remoteVersion} required, downloading/selecting...`);
             setOverlayContent(
-                'Downloading Java...',
-                'Please wait. This will take a few minutes.',
+                'Descargando Java...',
+                'Lo haremos todo por ti. Esto tomará unos minutos.',
                 null
             );
             toggleOverlay(true, false, 'overlayContent');
@@ -790,7 +790,7 @@ async function dlAsync(login = true) {
     
 
     if(invalidFileCount > 0) {
-        loggerLaunchSuite.info(`Downloading ${invalidFileCount} files with enhanced manager.`)
+        loggerLaunchSuite.info(`Downloading ${invalidFileCount} files with manager.`)
         setLaunchDetails(`${Lang.queryJS('landing.dlAsync.downloadingFiles')}`)
         setLaunchPercentage(0)
         
@@ -816,7 +816,7 @@ async function dlAsync(login = true) {
                             __kk_watchdogTimer = null
                         }
                         try {
-                            showLaunchFailure('Download taking too long', 'Oops! The download seems to be stuck. The launcher will restart automatically.')
+                            showLaunchFailure('Descarga tardando demasiado', '¡Vaya! La descarga parece estar atascada. El lanzador se reiniciará automáticamente.')
                         } catch(e){ }
                         setTimeout(() => {
                             try {
@@ -866,9 +866,9 @@ async function dlAsync(login = true) {
             
             let errorMessage = Lang.queryJS('landing.dlAsync.seeConsoleForDetails')
             if (err.message.includes('timeout')) {
-                errorMessage = 'Download timed out. Check your internet connection and try again.'
+                errorMessage = 'La dewscarga tardó demasiado. Por favor, inténtalo de nuevo.'
             } else if (err.message.includes('ENOTFOUND') || err.message.includes('ECONNREFUSED')) {
-                errorMessage = 'Could not connect to server. Check your internet connection.'
+                errorMessage = 'No se pudo conectar al servidor. Verifica tu conexión a Internet.'
             }
             
             showLaunchFailure(Lang.queryJS('landing.dlAsync.errorDuringFileDownloadTitle'), errorMessage)

@@ -54,7 +54,6 @@ const downloadConfigs = {
  */
 const testUrls = [
     'http://files.kindlyklan.com:26500/ping',
-    'https://files.minecraft.net/ping',
     'https://launcher.mojang.com/v1/ping'
 ]
 
