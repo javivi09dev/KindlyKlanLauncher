@@ -363,3 +363,12 @@ minecraftRunningMessage = "¡Atención! Minecraft está ejecutándose"
 minecraftRunningDetail = "Si cierras el launcher ahora, perderás la conexión al servidor porque el proxy de Kindly Klan se detendrá.\n\n¿Estás seguro de que quieres cerrar el launcher?"
 buttonCancel = "Cancelar"
 buttonForceClose = "Cerrar de todas formas"
+
+[ejs.updateNotification]
+title = "¡Actualización Disponible!"
+description = "Se ha descargado una nueva versión del launcher que está lista para instalar."
+currentVersion = "Versión actual:"
+newVersion = "Nueva versión:"
+installNote = "El launcher se cerrará para instalar la actualización."
+installNow = "Instalar Ahora"
+installLater = "Instalar Más Tarde"

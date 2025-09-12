@@ -18,3 +18,12 @@ supportLink = "https://github.com/javivi09dev/KindlyKlanLauncher/issues"
 welcomeHeader = "¡Gracias por descargar el Launcher!"
 welcomeDescription = "Somos Kindly Klan. Encargados de crear eventos por y para la comunidad."
 welcomeDescCTA = "Empezar"
+
+[ejs.updateNotification]
+title = "¡Actualización Disponible!"
+description = "Se ha descargado una nueva versión del launcher que está lista para instalar."
+currentVersion = "Versión actual:"
+newVersion = "Nueva versión:"
+installNote = "El launcher se cerrará para instalar la actualización."
+installNow = "Instalar Ahora"
+installLater = "Instalar Más Tarde"

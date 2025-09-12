@@ -11,6 +11,7 @@ const remote                         = require('@electron/remote')
 const isDev                          = require('./assets/js/isdev')
 const { LoggerUtil }                 = require('helios-core')
 const Lang                           = require('./assets/js/langloader')
+const { updateChecker }              = require('./assets/js/updatechecker')
 
 const loggerUICore             = LoggerUtil.getLogger('UICore')
 const loggerAutoUpdater        = LoggerUtil.getLogger('AutoUpdater')
@@ -217,5 +218,17 @@ window.addEventListener('DOMContentLoaded', () => {
     const versionSpan = document.getElementById('frameVersionText')
     if(versionSpan) {
         versionSpan.innerText = 'v' + remote.app.getVersion()
+    }
+    
+    // Verificar si hay actualizaciones descargadas al iniciar
+    if (!isDev) {
+        setTimeout(async () => {
+            try {
+                loggerUICore.info('Verificando actualizaciones descargadas al inicio...')
+                await updateChecker.checkAndShowUpdateNotification()
+            } catch (error) {
+                loggerUICore.error('Error al verificar actualizaciones al inicio:', error)
+            }
+        }, 2000) // Esperar 2 segundos para que la UI se cargue completamente
     }
 })

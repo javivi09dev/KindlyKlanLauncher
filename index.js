@@ -37,6 +37,28 @@ function initAutoUpdater(event, data) {
         event.sender.send('autoUpdateNotification', 'update-available', info)
     })
     autoUpdater.on('update-downloaded', (info) => {
+        // Guardar metadatos de la actualización descargada
+        try {
+            const fs = require('fs-extra')
+            const path = require('path')
+            const userDataPath = app.getPath('userData')
+            const metadataPath = path.join(userDataPath, 'update-info.json')
+            
+            const metadata = {
+                version: info.version,
+                fileName: info.files ? info.files[0]?.url : null,
+                path: info.path,
+                downloadTime: new Date().toISOString(),
+                releaseDate: info.releaseDate,
+                releaseName: info.releaseName
+            }
+            
+            fs.writeJsonSync(metadataPath, metadata, { spaces: 2 })
+            console.log('Metadatos de actualización guardados:', metadata)
+        } catch (error) {
+            console.warn('Error al guardar metadatos de actualización:', error)
+        }
+        
         event.sender.send('autoUpdateNotification', 'update-downloaded', info)
     })
     autoUpdater.on('update-not-available', (info) => {

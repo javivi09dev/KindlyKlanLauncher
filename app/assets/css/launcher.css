@@ -5547,3 +5547,140 @@ input[type=text],
     -webkit-font-smoothing: antialiased !important;
     -moz-osx-font-smoothing: grayscale !important;
 }
+
+/*******************************************************************************
+ *                                                                             *
+ * Update Notification Styles                                                  *
+ *                                                                             *
+ ******************************************************************************/
+
+.update-notification-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.update-notification-content {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border: 2px solid #444;
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    animation: updateNotificationSlideIn 0.3s ease-out;
+}
+
+@keyframes updateNotificationSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.update-notification-header {
+    margin-bottom: 25px;
+}
+
+.update-notification-logo {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 15px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.update-notification-header h2 {
+    color: #fff;
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.update-notification-body {
+    margin-bottom: 30px;
+    color: #ccc;
+    line-height: 1.6;
+}
+
+.update-notification-body p {
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.update-version-info {
+    font-weight: bold;
+    color: #4CAF50 !important;
+}
+
+.update-install-note {
+    font-style: italic;
+    color: #ff9800 !important;
+    font-size: 14px !important;
+}
+
+.update-notification-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.update-button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 140px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.update-button-primary {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.update-button-primary:hover {
+    background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.update-button-secondary {
+    background: linear-gradient(135deg, #666 0%, #555 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.update-button-secondary:hover {
+    background: linear-gradient(135deg, #555 0%, #444 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.update-button:active {
+    transform: translateY(0);
+}
