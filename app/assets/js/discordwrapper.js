@@ -33,7 +33,7 @@ exports.initRPC = function(genSettings, servSettings, initialDetails = Lang.quer
     // launcherActivity: Configuración de Discord RPC cuando NO se juega a una instancia
     launcherActivity = {
         details: 'En el Launcher',
-        state: 'discord.gg/kindlyklan',
+        state: 'discord.kindlyklan.com',
         largeImageKey: 'kindly-logo',
         largeImageText: 'Kindly Klan Launcher',
         smallImageKey: 'kindly-logo',
@@ -69,7 +69,7 @@ exports.showLauncherActivity = function(state = LAUNCHER_STATES.IDLE, customDeta
     if (!client) return
 
     let details = 'Navegando en el launcher'
-    let stateText = 'discord.gg/kindlyklan'
+    let stateText = 'discord.kindlyklan.com'
 
     launcherActivity.details = details
     launcherActivity.state = stateText

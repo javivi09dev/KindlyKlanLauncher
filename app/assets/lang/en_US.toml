@@ -344,7 +344,7 @@ unknownErrorDesc = "An unknown error has occurred. Please see the console for de
 
 [js.landing.whitelist]
 notWhitelisted = "No estás en la whitelist."
-contactAdmin = "Contacta a <a href='https://discord.gg/kindlyklan' style='text-decoration: underline; color: inherit;'>Kindly Klan</a> mediante tickets."
+contactAdmin = "Contacta a <a href='https://discord.kindlyklan.com' style='text-decoration: underline; color: inherit;'>Kindly Klan</a> mediante tickets."
 understand = "Entendido"
 verificationError = "Error al verificar la whitelist"
 
